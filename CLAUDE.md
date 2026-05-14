@@ -10,7 +10,8 @@
 
 ## Current Build Status
 
-**Last updated:** 2026-05-15
+**Last updated:** 2026-05-13
+**Status:** 🚀 **LAUNCHED** — https://laaksolabs.vercel.app (auth-gated, single-user)
 
 ### Done — Phase 1 & 2
 - Full design system (`globals.css`) — dark/light mode, CSS vars, animations, dot/badge/chip classes, `.live-dot` pulse class
@@ -43,28 +44,82 @@
 
 **Viktor integration:** No webhook needed — Viktor accesses the repo via GitHub and writes directly to Supabase using the service role key. Give Viktor: GitHub repo + `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` + CLAUDE.md for full context.
 
+### Phase 4 — LAUNCHED ✓ (2026-05-13)
+- [x] **Vercel deploy live** — https://laaksolabs.vercel.app (HTTP 200, READY). Deployed via `vercel deploy --prod --force --yes` from repo root.
+- [x] **Deployment Protection disabled** — `ssoProtection: null` via REST API PATCH on project. Aliased prod URL + per-deployment URLs both public.
+- [x] **Preview deployments disabled** — `previewDeploymentsDisabled: true`. Only `main` branch builds.
+- [x] **Auth gate / login screen** — Username/password gate over the entire dashboard. HMAC-signed cookie session (Web Crypto, Edge-runtime safe, no extra deps). Sign-out link in sidebar footer. Single user (creds in env vars, never in repo).
+- [x] **Playwright smoke tests** — all 9 routes pass: unauth redirects to /login, wrong creds shows error, correct creds sets cookie + dashboard renders, navigation works authenticated, logout clears cookie + redirects.
+
 ---
 
-## Deployment — Vercel (In Progress)
+## Deployment — LIVE on Vercel
 
-**Repo:** https://github.com/tlaakso07/LaaksoLabs.git
-**Vercel team:** tlaakso11-3399 (Hobby)
-**Project name:** laaksolabs
-**Current deployment URL:** https://laaksolabs-rm773kezn-tlaakso11-3399s-projects.vercel.app
+**Production URL:** https://laaksolabs.vercel.app
+**GitHub:** https://github.com/tlaakso07/LaaksoLabs.git
+**Vercel team:** `team_9Ko73rYykksswuIUw85JT8Gu` (tlaakso11-3399s-projects, Hobby)
+**Vercel project:** `prj_SlqnQTfnUCvOiRwjQ2fZ5di5D4Ji` (`laaksolabs`)
+**Local `.vercel/`:** repo root (`/Users/trevorlaakso/Desktop/LaaksoLabs/.vercel`) — NOT inside `laaksolabs/`. Project Root Directory is `laaksolabs/`, so running CLI from the inner dir causes path doubling.
 
-### Vercel Settings — Configured
+### Vercel Settings (configured)
 - Root Directory: `laaksolabs`
-- Framework Preset: Next.js (was "Other", caused the initial 404)
+- Framework Preset: Next.js
+- Deployment Protection: **OFF** (`ssoProtection: null`)
+- Preview Deployments: **OFF** (`previewDeploymentsDisabled: true`)
+- Env vars in Production + Preview + Development (7 total):
+  - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`
+  - `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_SECRET` (96 hex chars)
 
-### Vercel Settings — Still Needed
-1. Add 4 env vars (values in `laaksolabs/.env.local`):
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `NEXT_PUBLIC_APP_URL`
-2. Redeploy with "Use existing build cache" **unchecked** so the Next.js framework setting applies.
+### Redeploy commands
+```bash
+# from repo root /Users/trevorlaakso/Desktop/LaaksoLabs/
+vercel deploy --prod --force --yes
+```
 
-See `handoff/HANDOFF.md` for full deployment context.
+### Vercel CLI gotchas
+- Always run from repo root, never from `laaksolabs/` subdir.
+- `vercel env add NAME preview` without git-branch arg prompts interactively. Non-interactive form: `vercel env add NAME preview '' --value 'val' --yes` (empty git-branch arg).
+
+See `handoff/HANDOFF.md` for legacy deployment context (now stale — reflects pre-launch state).
+
+---
+
+## Authentication
+
+**Type:** Single-user username + password gate. Protects the entire dashboard. Cookie-based session.
+
+**Credentials** (in env vars only — `laaksolabs/.env.local` locally, Vercel env vars in prod):
+- `AUTH_USERNAME` — username
+- `AUTH_PASSWORD` — password
+- `AUTH_SECRET` — 96-char hex string for HMAC signing the session cookie
+
+**Rotate credentials:** change env var in Vercel (`vercel env rm NAME production` → `vercel env add NAME production --value '...' --yes`) + locally + redeploy.
+
+### Auth files
+| File | Purpose |
+|---|---|
+| `src/lib/auth.ts` | HMAC-SHA256 sign/verify session (Web Crypto, no deps). `signSession`, `verifySession`, `checkCredentials`, `getAuthSecret/Username`. |
+| `src/middleware.ts` | Gates every route except `/login`, `/api/login`, `/_next/*`, `/favicon*`, `/robots.txt`, `/sitemap.xml`. Verifies HMAC cookie. Sets `x-pathname` header so root layout can skip sidebar on `/login`. |
+| `src/app/login/page.tsx` | Server-rendered login UI. Reads `?error=1` and `?next=...` server-side so error UI shows without waiting for hydration. |
+| `src/app/login/login-form.tsx` | Plain `<form action="/api/login" method="POST">` — no JS required to log in. |
+| `src/app/api/login/route.ts` | POST handler. Validates creds → sets cookie via `NextResponse.cookies.set` → 303 redirect to `next` or `/`. On failure → 303 redirect to `/login?error=1`. |
+| `src/app/logout/route.ts` | GET/POST handler. Deletes cookie → 303 redirect to `/login`. |
+| `src/components/layout/sidebar.tsx` | Sign-out link in sidebar footer linking to `/logout`. |
+| `src/app/layout.tsx` | Reads `x-pathname` header, skips sidebar/bottom nav on `/login` (renders just `{children}`). |
+
+### Why this design
+- **Native form POST + route handler instead of server action:** Next.js 16 server actions don't reliably propagate `cookies().set()` through `redirect()` — the Set-Cookie header gets dropped. Route handler with `NextResponse.cookies.set` + `NextResponse.redirect` works.
+- **Server-side error rendering instead of `useSearchParams`:** Client-only hook means error UI shows only after hydration; reading `searchParams` server-side and passing as prop makes the error visible immediately and works without JS.
+- **Web Crypto over jose/jwt libs:** Edge-runtime native, no extra dep, no install/build cost.
+
+### Cookie
+- Name: `laakso_session`
+- HttpOnly, Secure (in prod), SameSite=Lax, Path=/
+- TTL: 30 days
+- Payload: `{u: username, exp: unix_seconds}` base64url-encoded + HMAC-SHA256 signature
+
+### Known limitation
+The login screen protects the **UI**. The Supabase anon key is embedded in the client bundle (`NEXT_PUBLIC_*` env vars), and migration `004_anon_rls_policies` grants anon full CRUD. Someone who knows the URL + anon key could query Supabase directly without going through the app. To fully lock down later: tighten RLS to deny anon, refactor client mutations into server actions using service role, and either drop real-time updates or wire Supabase Auth properly.
 
 ### Color overrides (supersede original spec)
 | Element | Color |
