@@ -10,23 +10,35 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+function safePath(value: string): string {
+  return value.startsWith('/') && !value.startsWith('//') ? value : '/'
+}
+
 export async function POST(req: NextRequest) {
   let username = ''
   let password = ''
+  let redirectTo = '/'
   try {
     const data = await req.formData()
     username = String(data.get('username') ?? '').trim()
     password = String(data.get('password') ?? '')
+    redirectTo = safePath(String(data.get('redirectTo') ?? '/'))
   } catch {
-    return NextResponse.json({ error: 'Bad request' }, { status: 400 })
+    const url = new URL('/login', req.url)
+    url.searchParams.set('error', '1')
+    return NextResponse.redirect(url, { status: 303 })
   }
 
   if (!checkCredentials(username, password)) {
-    return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 })
+    const url = new URL('/login', req.url)
+    url.searchParams.set('error', '1')
+    if (redirectTo !== '/') url.searchParams.set('next', redirectTo)
+    return NextResponse.redirect(url, { status: 303 })
   }
 
   const token = await signSession(getAuthUsername(), getAuthSecret())
-  const res = NextResponse.json({ ok: true })
+  const url = new URL(redirectTo, req.url)
+  const res = NextResponse.redirect(url, { status: 303 })
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

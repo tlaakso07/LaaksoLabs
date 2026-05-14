@@ -1,9 +1,16 @@
-import { Suspense } from 'react'
 import { LoginForm } from './login-form'
 
 export const dynamic = 'force-dynamic'
 
-export default function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string; next?: string }>
+}) {
+  const { error, next } = await searchParams
+  const hasError = error === '1'
+  const nextPath = next && next.startsWith('/') && !next.startsWith('//') ? next : '/'
+
   return (
     <div
       style={{
@@ -51,9 +58,7 @@ export default function LoginPage() {
             Command Center
           </p>
         </div>
-        <Suspense fallback={null}>
-          <LoginForm />
-        </Suspense>
+        <LoginForm hasError={hasError} next={nextPath} />
       </div>
     </div>
   )

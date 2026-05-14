@@ -1,39 +1,8 @@
-'use client'
-
-import { useState, type FormEvent } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
-
-export function LoginForm() {
-  const router = useRouter()
-  const params = useSearchParams()
-  const redirectTo = params.get('next') || '/'
-  const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
-
-  async function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(null)
-    setPending(true)
-    try {
-      const data = new FormData(e.currentTarget)
-      const res = await fetch('/api/login', { method: 'POST', body: data })
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string }
-        setError(body.error ?? 'Sign in failed')
-        setPending(false)
-        return
-      }
-      const safe = redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/'
-      router.replace(safe)
-      router.refresh()
-    } catch {
-      setError('Network error — please try again')
-      setPending(false)
-    }
-  }
-
+export function LoginForm({ hasError, next }: { hasError: boolean; next: string }) {
   return (
-    <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <form action="/api/login" method="POST" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <input type="hidden" name="redirectTo" value={next} />
+
       <label style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <span style={{ fontSize: '11px', fontWeight: 500, letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
           Username
@@ -77,7 +46,7 @@ export function LoginForm() {
         />
       </label>
 
-      {error && (
+      {hasError && (
         <p
           role="alert"
           style={{
@@ -89,13 +58,12 @@ export function LoginForm() {
             borderRadius: '7px',
           }}
         >
-          {error}
+          Invalid username or password
         </p>
       )}
 
       <button
         type="submit"
-        disabled={pending}
         style={{
           width: '100%',
           padding: '11px 14px',
@@ -106,12 +74,11 @@ export function LoginForm() {
           fontSize: '13px',
           fontWeight: 600,
           letterSpacing: '0.01em',
-          cursor: pending ? 'wait' : 'pointer',
-          opacity: pending ? 0.65 : 1,
+          cursor: 'pointer',
           transition: 'opacity 120ms ease',
         }}
       >
-        {pending ? 'Signing in…' : 'Sign in'}
+        Sign in
       </button>
     </form>
   )

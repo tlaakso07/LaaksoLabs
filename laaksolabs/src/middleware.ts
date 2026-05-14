@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SESSION_COOKIE, getAuthSecret, getAuthUsername, verifySession } from '@/lib/auth'
 
-const PUBLIC_PATHS = new Set(['/login'])
+const PUBLIC_PATHS = new Set(['/login', '/api/login'])
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true
