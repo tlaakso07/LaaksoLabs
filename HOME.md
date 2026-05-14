@@ -5,6 +5,7 @@ tags: [hub, dashboard]
 # Laakso Labs — Command Center
 
 > **Mission:** $200K MRR | 3 divisions | AI-first execution
+> **Status:** 🚀 **LAUNCHED** — https://laaksolabs.vercel.app (auth-gated, single-user)
 > **Hub:** [[CLAUDE.md]] is the source of truth for all project instructions, data models, and build order.
 
 ---
@@ -15,6 +16,7 @@ tags: [hub, dashboard]
 |---|---|---|---|
 | [[Polish & Shine Exteriors]] | Div 1 | Onboarding | TBD |
 | [[MemeMint]] | Div 3 | Active | Equity |
+| [[Cascade Home Remodeling]] | Div 1 | Paused | — |
 
 ---
 
