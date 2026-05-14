@@ -30,4 +30,4 @@ tags: [business, revenue, targets]
 
 ## App Reference
 
-Revenue tracked in `revenue_entries` table. See [[CLAUDE.md]] → `Revenue (/revenue)` page spec.
+Revenue is tracked live in the `revenue_entries` table at https://laaksolabs.vercel.app/revenue. The sidebar progress bar against the $200K target updates every reload. See [[CLAUDE.md]] → `Revenue (/revenue)` page spec.

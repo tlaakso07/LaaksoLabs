@@ -1,5 +1,7 @@
 # Laakso Labs — Vercel Deployment Handoff
 
+> ⚠️ **SUPERSEDED (2026-05-13)** — Deployment is complete. Site is **LIVE** at https://laaksolabs.vercel.app with a username/password auth gate. This document is preserved as a historical snapshot of the mid-deployment state. For current state, see [[CLAUDE.md]] → Deployment + Authentication sections.
+
 **Date:** 2026-05-15
 **Status:** Build complete, mid-deployment. Vercel project created, settings being configured.
 

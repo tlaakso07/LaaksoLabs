@@ -10,21 +10,26 @@ tags: [business, strategy]
 
 Laakso Labs operates three divisions with distinct GTM motions and revenue models.
 
+> **Brand palette** (as implemented in app):
+> - Div 1 & Div 3: Charcoal `#6C6C70` (intentionally shared — visual grouping)
+> - Div 2: Muted violet `#8A78B4`
+> - Accent / buttons / sidebar icons: Maroon `#B42020`
+
 ---
 
 ## Div 1 — AI Design & Marketing
 
-- **Color:** Blue (#3B82F6)
+- **Color:** Charcoal `#6C6C70`
 - **Focus:** White-label creative + Meta/Google ad management for home services
 - **Target retainer:** ~$7.5K/month
 - **Model:** Trevor manages ads + strategy; [[Happy Dog Media Group]] fulfills creative
-- **Active clients:** [[Polish & Shine Exteriors]]
+- **Active clients:** [[Polish & Shine Exteriors]] (Onboarding), [[Cascade Home Remodeling]] (Paused)
 
 ---
 
 ## Div 2 — AI Consulting & SEO
 
-- **Color:** Purple (#8B5CF6)
+- **Color:** Muted violet `#8A78B4`
 - **Focus:** AI workflow audits, tool installs (Viktor, Claude, Firecrawl, Apollo), proprietary SEO stack
 - **Target retainer:** ~$15K/month
 - **Model:** High-value consulting, proprietary tooling advantage
@@ -33,7 +38,7 @@ Laakso Labs operates three divisions with distinct GTM motions and revenue model
 
 ## Div 3 — The Fund
 
-- **Color:** Emerald (#10B981)
+- **Color:** Charcoal `#6C6C70`
 - **Focus:** Equity positions in best consulting clients
 - **Model:** Convert top Div 2 clients into equity deals
 - **Active:** [[MemeMint]]

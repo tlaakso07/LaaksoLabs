@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "664d897604f62401",
+        "id": "135637fe5350d786",
         "type": "tabs",
         "children": [
           {
-            "id": "971ca9e141de807d",
+            "id": "87ec61775b0c6905",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -176,8 +176,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "441a658cec25417d",
+  "active": "87ec61775b0c6905",
   "lastOpenFiles": [
+    "Clients/Cascade Home Remodeling.md",
     "laaksolabs/src/app/api/login/route.ts",
     "laaksolabs/src/app/api/login",
     "laaksolabs/src/app/api",
@@ -190,14 +191,12 @@
     "Untitled.canvas",
     "laaksolabs/src/components/contacts",
     "laaksolabs/src/components/revenue/revenue-view.tsx",
-    "laaksolabs/src/components/revenue",
     "HOME.md",
     "Business/Revenue Targets.md",
     "Business/Happy Dog Media Group.md",
     "Business/Divisions.md",
     "Contacts/Ryan - Happy Dog.md",
     "Contacts/Dom.md",
-    "Clients/Cascade Home Remodeling.md",
     "Clients/MemeMint.md",
     "Clients/Polish & Shine Exteriors.md",
     "TOOLKIT_TEMPLATE.md"

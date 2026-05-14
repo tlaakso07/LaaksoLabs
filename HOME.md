@@ -46,10 +46,20 @@ tags: [hub, dashboard]
 
 ## Build Phase Tracker
 
-- [x] Phase 1: Foundation — Next.js + Tailwind + shadcn + Supabase + Auth + DB schema + design system
-- [x] Phase 2: Core Features — Dashboard, Clients, Client detail, Tasks, Happy Dog tracker, Revenue, Contacts, Settings
-- [ ] Phase 3: Polish & Integrations — Real-time subscriptions, mobile optimization, keyboard shortcuts (Cmd+K), CSV export, Meta MCP, Viktor webhook
+- [x] Phase 1: Foundation — Next.js + Tailwind + shadcn + Supabase + DB schema + design system
+- [x] Phase 2: Core Features — Dashboard, Clients, Client detail, Tasks, Happy Dog tracker, Revenue, Contacts, Settings, Campaigns
+- [x] Phase 3: Polish & Integrations — Real-time subscriptions, mobile optimization, keyboard shortcuts (Cmd+K, N), CSV export, Meta MCP placeholder
+- [x] Phase 4: **LAUNCHED** (2026-05-13) — Vercel production deploy, Deployment Protection off, preview deploys off, username/password auth gate with HMAC-signed cookie session
 
 ---
 
-> Source of truth: [[CLAUDE.md]] · Clients: [[Polish & Shine Exteriors]] · [[MemeMint]] · Partners: [[Happy Dog Media Group]] · Contacts: [[Dom]] · [[Ryan - Happy Dog]] · Strategy: [[Divisions]] · [[Revenue Targets]]
+## Production
+
+- **Live URL:** https://laaksolabs.vercel.app
+- **Auth:** Username/password gate over entire app. Credentials in env vars only — see `CLAUDE.md` → Authentication section.
+- **Deploy command** (from repo root): `vercel deploy --prod --force --yes`
+- **Known limitation:** Auth protects UI only. Supabase anon key is public (`NEXT_PUBLIC_*`) and migration `004` grants anon CRUD — full lockdown would need RLS tightening + Supabase Auth integration.
+
+---
+
+> Source of truth: [[CLAUDE.md]] · Clients: [[Polish & Shine Exteriors]] · [[MemeMint]] · [[Cascade Home Remodeling]] · Partners: [[Happy Dog Media Group]] · Contacts: [[Dom]] · [[Ryan - Happy Dog]] · Strategy: [[Divisions]] · [[Revenue Targets]]
