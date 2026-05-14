@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: 'Command Center',
 }
 
+export const dynamic = 'force-dynamic'
+
 async function getCurrentMRR(): Promise<number> {
   try {
     const supabase = createAdminClient()
@@ -36,6 +38,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <script dangerouslySetInnerHTML={{
+          __html: `try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}`
+        }} />
       </head>
       <body className="flex h-screen overflow-hidden">
         <div className="app-sidebar-wrap w-60 shrink-0 h-full">

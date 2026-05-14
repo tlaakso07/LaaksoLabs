@@ -7,6 +7,8 @@ import { ClientGrid } from '@/components/dashboard/client-grid'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { getFirstOfMonth } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
 async function getDashboard() {
   const db = createAdminClient()
   const today = new Date().toISOString().split('T')[0]
