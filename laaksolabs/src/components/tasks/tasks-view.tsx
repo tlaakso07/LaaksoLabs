@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
-import { Check, Plus, X, Trash2 } from 'lucide-react'
+import { Check, Plus, X, Trash2, Download } from 'lucide-react'
 import type { Task, Client, TaskPriority, TaskCategory } from '@/lib/supabase/types'
 import { createTask, completeTask, deleteTask } from '@/lib/supabase/queries/tasks'
 import { isOverdue, isDueToday } from '@/lib/utils'
 import { DIVISION_LABELS } from '@/lib/constants'
 import { useRealtimeTable } from '@/hooks/use-realtime-table'
+import { exportToCsv } from '@/lib/export-csv'
 
 type ClientRef = Pick<Client, 'id' | 'name' | 'division'>
 type ViewMode = 'today' | 'week' | 'client' | 'all'
@@ -536,6 +537,26 @@ export function TasksView({
               <span className="live-dot" />
               <span style={{ fontSize: '10px', color: 'var(--active)', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
             </div>
+            <button
+              onClick={() => exportToCsv(`tasks-${new Date().toISOString().slice(0,10)}.csv`, tasks.map(t => ({
+                Title: t.title,
+                Priority: t.priority,
+                Status: t.status,
+                Category: t.category,
+                'Due Date': t.due_date ?? '',
+                Created: t.created_at.slice(0, 10),
+                Completed: t.completed_at?.slice(0, 10) ?? '',
+              })))}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '7px 12px', borderRadius: 'var(--radius)',
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                color: 'var(--text-muted)', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+              }}
+            >
+              <Download size={13} />
+              CSV
+            </button>
           <button
             onClick={() => setShowAddForm(s => !s)}
             style={{

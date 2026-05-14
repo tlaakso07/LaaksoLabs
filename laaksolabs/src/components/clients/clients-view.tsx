@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import {
   Search, Plus, LayoutList, Columns3,
-  Phone, MapPin, ChevronRight, ArrowRight,
+  Phone, MapPin, ChevronRight, ArrowRight, Download,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRealtimeTable } from '@/hooks/use-realtime-table'
@@ -13,6 +13,7 @@ import {
   DIVISION_LABELS,
   CLIENT_STATUS_LABELS, PIPELINE_STATUSES,
 } from '@/lib/constants'
+import { exportToCsv } from '@/lib/export-csv'
 import { formatCurrency } from '@/lib/utils'
 import { AddClientModal } from './add-client-modal'
 
@@ -131,6 +132,31 @@ export function ClientsView({ initialClients }: Props) {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => exportToCsv(`clients-${new Date().toISOString().slice(0,10)}.csv`, clients.map(c => ({
+                Name: c.name,
+                Owner: c.owner_name ?? '',
+                Division: DIVISION_LABELS[c.division],
+                Status: c.status,
+                'Retainer ($)': c.retainer_amount ?? '',
+                Phone: c.phone ?? '',
+                Email: c.email ?? '',
+                Website: c.website ?? '',
+                Location: c.location ?? '',
+                Services: (c.services ?? []).join('; '),
+                Notes: c.notes ?? '',
+                Created: c.created_at.slice(0, 10),
+              })))}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 12px', borderRadius: '8px',
+                background: 'var(--surface-2)', border: '1px solid var(--border)',
+                color: 'var(--text-muted)', fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+              }}
+            >
+              <Download size={13} />
+              CSV
+            </button>
             <button
               onClick={() => setShowAdd(true)}
               style={{

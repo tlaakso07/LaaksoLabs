@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useTransition, useMemo } from 'react'
-import { Search, Plus, X, Trash2, Phone, Mail, ExternalLink } from 'lucide-react'
+import { Search, Plus, X, Trash2, Phone, Mail, ExternalLink, Pencil, Save } from 'lucide-react'
 import Link from 'next/link'
 import type { Contact, Client } from '@/lib/supabase/types'
 import { createContact, deleteContact } from '@/lib/supabase/queries/contacts'
+import { createClient } from '@/lib/supabase/client'
 
 
 
@@ -55,15 +56,96 @@ function ContactRow({
   clients,
   deleting,
   onDelete,
+  onUpdate,
 }: {
   contact: ContactWithClient
   clients: ClientRef[]
   deleting: string | null
   onDelete: (id: string) => void
+  onUpdate: (updated: ContactWithClient) => void
 }) {
   const [hovered, setHovered] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [saving,  setSaving]  = useState(false)
+  const [form, setForm] = useState({
+    name:      contact.name,
+    role:      contact.role      ?? '',
+    company:   contact.company   ?? '',
+    phone:     contact.phone     ?? '',
+    email:     contact.email     ?? '',
+    client_id: contact.client_id ?? '',
+    notes:     contact.notes     ?? '',
+  })
+
   const isDel = deleting === contact.id
   const linkedClient = clients.find(c => c.id === contact.client_id)
+
+  function f(k: string, v: string) { setForm(p => ({ ...p, [k]: v })) }
+
+  async function save() {
+    if (!form.name.trim() || saving) return
+    setSaving(true)
+    const { data, error } = await createClient()
+      .from('contacts')
+      .update({
+        name:      form.name.trim(),
+        role:      form.role.trim()      || null,
+        company:   form.company.trim()   || null,
+        phone:     form.phone.trim()     || null,
+        email:     form.email.trim()     || null,
+        client_id: form.client_id        || null,
+        notes:     form.notes.trim()     || null,
+      })
+      .eq('id', contact.id)
+      .select('*, clients(name)')
+      .single()
+    setSaving(false)
+    if (!error && data) {
+      onUpdate(data as ContactWithClient)
+      setEditing(false)
+    }
+  }
+
+  if (editing) {
+    return (
+      <div style={{ padding: '16px', background: 'var(--surface-2)', borderRadius: 0 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+          <input value={form.name}      onChange={e => f('name', e.target.value)}      placeholder="Full name *"  style={INPUT_STYLE} />
+          <input value={form.role}      onChange={e => f('role', e.target.value)}       placeholder="Role"         style={INPUT_STYLE} list="role-suggestions" />
+          <input value={form.company}   onChange={e => f('company', e.target.value)}    placeholder="Company"      style={INPUT_STYLE} />
+          <select value={form.client_id} onChange={e => f('client_id', e.target.value)} style={INPUT_STYLE}>
+            <option value="">No linked client</option>
+            {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+          <input value={form.phone}     onChange={e => f('phone', e.target.value)}      placeholder="Phone"        style={INPUT_STYLE} type="tel" />
+          <input value={form.email}     onChange={e => f('email', e.target.value)}      placeholder="Email"        style={INPUT_STYLE} type="email" />
+        </div>
+        <textarea
+          value={form.notes}
+          onChange={e => f('notes', e.target.value)}
+          placeholder="Notes (optional)"
+          rows={2}
+          style={{ ...INPUT_STYLE, resize: 'vertical', fontFamily: 'inherit', marginBottom: '12px' }}
+        />
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+          <button
+            onClick={() => setEditing(false)}
+            style={{ padding: '6px 14px', borderRadius: '7px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: '12px', cursor: 'pointer' }}
+          >
+            Cancel
+          </button>
+          <button
+            onClick={save}
+            disabled={saving || !form.name.trim()}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', padding: '6px 14px', borderRadius: '7px', border: 'none', background: 'var(--accent)', color: '#fff', fontSize: '12px', fontWeight: 600, cursor: 'pointer', opacity: saving || !form.name.trim() ? 0.6 : 1 }}
+          >
+            <Save size={12} />
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ opacity: isDel ? 0.35 : 1, transition: 'opacity 0.2s ease' }}>
@@ -86,10 +168,8 @@ function ContactRow({
             border: '1px solid var(--border)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
-            fontSize: '13px',
-            fontWeight: 600,
-            color: 'var(--text-muted)',
-            letterSpacing: '0.02em',
+            fontSize: '13px', fontWeight: 600,
+            color: 'var(--text-muted)', letterSpacing: '0.02em',
           }}
         >
           {getInitials(contact.name)}
@@ -98,10 +178,7 @@ function ContactRow({
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="flex items-center gap-2" style={{ marginBottom: '2px' }}>
-            <span style={{
-              fontSize: '14px', fontWeight: 600,
-              color: 'var(--text)', letterSpacing: '-0.01em',
-            }}>
+            <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.01em' }}>
               {contact.name}
             </span>
             {linkedClient && (
@@ -110,13 +187,10 @@ function ContactRow({
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '3px',
                   fontSize: '10px', fontWeight: 600,
-                  padding: '1px 6px',
-                  borderRadius: '4px',
+                  padding: '1px 6px', borderRadius: '4px',
                   border: '1px solid var(--border)',
-                  background: 'var(--surface-3)',
-                  color: 'var(--text-muted)',
-                  textDecoration: 'none',
-                  transition: 'border-color 100ms ease',
+                  background: 'var(--surface-3)', color: 'var(--text-muted)',
+                  textDecoration: 'none', transition: 'border-color 100ms ease',
                 }}
                 onMouseEnter={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--border-strong)')}
                 onMouseLeave={e => ((e.currentTarget as HTMLElement).style.borderColor = 'var(--border)')}
@@ -140,13 +214,10 @@ function ContactRow({
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
                 fontSize: '12px', color: 'var(--text-muted)',
-                padding: '5px 10px',
-                borderRadius: 'var(--radius-sm)',
+                padding: '5px 10px', borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)',
                 background: hovered ? 'var(--surface-3)' : 'transparent',
-                textDecoration: 'none',
-                transition: 'all 100ms ease',
-                whiteSpace: 'nowrap',
+                textDecoration: 'none', transition: 'all 100ms ease', whiteSpace: 'nowrap',
               }}
             >
               <Phone size={12} />
@@ -160,22 +231,33 @@ function ContactRow({
               style={{
                 display: 'flex', alignItems: 'center', gap: '5px',
                 fontSize: '12px', color: 'var(--text-muted)',
-                padding: '5px 10px',
-                borderRadius: 'var(--radius-sm)',
+                padding: '5px 10px', borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border)',
                 background: hovered ? 'var(--surface-3)' : 'transparent',
-                textDecoration: 'none',
-                transition: 'all 100ms ease',
-                whiteSpace: 'nowrap',
-                maxWidth: '180px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                textDecoration: 'none', transition: 'all 100ms ease', whiteSpace: 'nowrap',
               }}
             >
               <Mail size={12} />
               {contact.email}
             </a>
           )}
+
+          {/* Edit */}
+          <button
+            onClick={() => setEditing(true)}
+            style={{
+              opacity: hovered ? 0.6 : 0,
+              transition: 'opacity 150ms ease',
+              padding: '4px 8px', borderRadius: '6px',
+              cursor: 'pointer', background: 'var(--surface-3)',
+              border: '1px solid var(--border)', color: 'var(--text-muted)',
+              display: 'flex', alignItems: 'center', gap: '4px',
+              fontSize: '11px', fontWeight: 500,
+            }}
+          >
+            <Pencil size={11} />
+            Edit
+          </button>
 
           {/* Delete */}
           <button
@@ -184,12 +266,9 @@ function ContactRow({
             style={{
               opacity: hovered ? 0.45 : 0,
               transition: 'opacity 150ms ease',
-              padding: '4px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-muted)',
+              padding: '4px', borderRadius: '4px',
+              cursor: 'pointer', background: 'transparent',
+              border: 'none', color: 'var(--text-muted)',
               display: 'flex', alignItems: 'center',
             }}
           >
@@ -200,12 +279,7 @@ function ContactRow({
 
       {/* Notes (if present) */}
       {contact.notes && hovered && (
-        <div style={{
-          padding: '0 16px 10px 70px',
-          fontSize: '12px',
-          color: 'var(--text-faint)',
-          fontStyle: 'italic',
-        }}>
+        <div style={{ padding: '0 16px 10px 70px', fontSize: '12px', color: 'var(--text-faint)', fontStyle: 'italic' }}>
           {contact.notes}
         </div>
       )}
@@ -253,7 +327,7 @@ function AddContactForm({
   const [adding,   setAdding]   = useState(false)
   const [, startTx] = useTransition()
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault()
     if (!name.trim()) return
     setAdding(true)
@@ -410,46 +484,28 @@ function GroupSection({
   clients,
   deleting,
   onDelete,
+  onUpdate,
 }: {
   label: string
   contacts: ContactWithClient[]
   clients: ClientRef[]
   deleting: string | null
   onDelete: (id: string) => void
+  onUpdate: (updated: ContactWithClient) => void
 }) {
   if (contacts.length === 0) return null
   return (
     <div>
-      <div
-        className="flex items-center gap-3"
-        style={{ marginBottom: '8px' }}
-      >
+      <div className="flex items-center gap-3" style={{ marginBottom: '8px' }}>
         <p className="label">{label}</p>
-        <span style={{
-          fontSize: '10px',
-          fontWeight: 600,
-          color: 'var(--text-faint)',
-          background: 'var(--surface-3)',
-          padding: '1px 6px',
-          borderRadius: '10px',
-        }}>
+        <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-faint)', background: 'var(--surface-3)', padding: '1px 6px', borderRadius: '10px' }}>
           {contacts.length}
         </span>
       </div>
       <div className="card" style={{ overflow: 'hidden' }}>
         {contacts.map((c, i) => (
-          <div
-            key={c.id}
-            style={{
-              borderBottom: i < contacts.length - 1 ? '1px solid var(--border-subtle)' : 'none',
-            }}
-          >
-            <ContactRow
-              contact={c}
-              clients={clients}
-              deleting={deleting}
-              onDelete={onDelete}
-            />
+          <div key={c.id} style={{ borderBottom: i < contacts.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+            <ContactRow contact={c} clients={clients} deleting={deleting} onDelete={onDelete} onUpdate={onUpdate} />
           </div>
         ))}
       </div>
@@ -514,7 +570,11 @@ export function ContactsView({
     setShowAddForm(false)
   }
 
-  const groupProps = { clients, deleting, onDelete: handleDelete }
+  const handleUpdate = (updated: ContactWithClient) => {
+    setContacts(prev => prev.map(c => c.id === updated.id ? updated : c))
+  }
+
+  const groupProps = { clients, deleting, onDelete: handleDelete, onUpdate: handleUpdate }
 
   return (
     <div className="flex flex-col h-full">

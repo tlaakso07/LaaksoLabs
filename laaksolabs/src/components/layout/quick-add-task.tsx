@@ -23,7 +23,6 @@ export function QuickAddTask({ open, onClose }: Props) {
 
   useEffect(() => {
     if (!open) return
-    setTitle(''); setPriority('medium'); setCategory('operations'); setDueDate(''); setClientId('')
     setTimeout(() => inputRef.current?.focus(), 10)
     createClient()
       .from('clients').select('id, name').eq('status', 'active')

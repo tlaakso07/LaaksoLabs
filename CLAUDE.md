@@ -10,7 +10,7 @@
 
 ## Current Build Status
 
-**Last updated:** 2026-05-14
+**Last updated:** 2026-05-15
 
 ### Done — Phase 1 & 2
 - Full design system (`globals.css`) — dark/light mode, CSS vars, animations, dot/badge/chip classes, `.live-dot` pulse class
@@ -25,7 +25,7 @@
 - Happy Dog tracker (`/happydog`) — KPI strip (4 cards), status pipeline filter bar, full order table with inline edit, advance-status buttons, Add Order modal with live margin preview
 - Revenue page (`/revenue`) — overdue alert banner, KPI strip (MRR progress bar, paid, outstanding, overdue), 6-month stacked area chart, division breakdown cards, month navigator, invoice table with advance-status + edit, Add Entry modal, month total footer
 - Settings page (`/settings`) — Company Info (editable, localStorage), Revenue Target (editable, localStorage), Division Configuration (colors + target retainers), Tech Stack card, Keyboard Shortcuts reference, App Version card
-- Contacts page (`/contacts`) — search bar, auto-grouped sections (Clients/Partners/Prospects/Other), initials avatar, tel:/mailto: quick-action links, linked client badge → client detail, hover-reveal notes + delete, Add Contact form with role datalist
+- Contacts page (`/contacts`) — search bar, auto-grouped sections (Clients/Partners/Prospects/Other), initials avatar, tel:/mailto: quick-action links, linked client badge → client detail, hover-reveal notes + delete + **inline edit** (all fields), Add Contact form with role datalist. Email no longer truncated.
 - Full ESLint + TypeScript audit — zero errors, zero warnings
 
 ### Done — Phase 3 (in progress)
@@ -33,11 +33,15 @@
 - [x] **Supabase fully connected** — migrations `003` (realtime publication) + `004` (anon RLS policies) applied. Server reads (service role), client mutations (anon key), and real-time subscriptions all working.
 - [x] **Mobile optimization** — Fixed bottom nav (`BottomNav` component exported separately from `sidebar.tsx`, rendered in `layout.tsx` OUTSIDE `app-sidebar-wrap`). Desktop sidebar hides on mobile via `app-sidebar-wrap { display: none !important }`. Bottom nav: Home / Clients / Tasks / Happy Dog / Revenue. Uses inline `display: none` + CSS `!important` override on mobile to prevent flex-layout bleed. CSS utility classes: `page-pad`, `kpi-grid`, `dashboard-grid`, `settings-grid`, `modal-overlay/sheet` (bottom sheet), `tab-row`, `table-scroll-wrap`, `mission-rail`. Viewport meta tags + safe-area-inset padding in `layout.tsx`.
 
-### Up Next (Phase 3)
-- [ ] Keyboard shortcuts (Cmd+K search, N for new task)
-- [ ] Export CSV
-- [ ] Meta MCP integration placeholder
-- [ ] Viktor webhook endpoint
+- [x] **Keyboard shortcuts** — `Cmd+K` command palette (searches pages/clients/tasks, arrow key nav, Enter to go), `N` quick-add task modal from anywhere (priority pills, category, due date, client). Both in `GlobalShortcuts` client wrapper rendered in `layout.tsx`. Settings page updated with accurate shortcut reference.
+- [x] **Export CSV** — `src/lib/export-csv.ts` utility. CSV button on Clients, Tasks, Happy Dog, Revenue pages. Downloads dated file with all visible data.
+- [x] **Campaigns page + Meta MCP placeholder** — `/campaigns` route + sidebar entry. Meta Ads MCP + Google Ads MCP connection cards (Not Connected state, endpoint URLs, Connect button). KPI strip, platform filter, campaigns table, Add Campaign modal. Infrastructure ready — flip `connected` flag when MCP is wired. `campaigns` table already exists in DB with anon RLS.
+- [x] **Contacts inline edit** — hover any contact row → Edit button appears → inline form expands with all fields pre-filled (name, role, company, phone, email, linked client, notes) → saves to Supabase, updates state, collapses. Email display truncation fixed. Dynamic import replaced with static top-level import.
+- [x] **Final audit** — all `@/` import paths verified, all 9 nav routes confirmed, `.env.local` vars confirmed, zero ESLint errors, zero TypeScript compiler errors.
+
+### Phase 3 — COMPLETE ✓
+
+**Viktor integration:** No webhook needed — Viktor accesses the repo via GitHub and writes directly to Supabase using the service role key. Give Viktor: GitHub repo + `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` + CLAUDE.md for full context.
 
 ### Color overrides (supersede original spec)
 | Element | Color |

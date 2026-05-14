@@ -3,13 +3,14 @@
 import { useState, useMemo } from 'react'
 import {
   Plus, Search, ChevronRight, Package,
-  DollarSign, TrendingUp, CheckCircle, X, Save,
+  DollarSign, TrendingUp, CheckCircle, X, Save, Download,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { HappyDogOrder, HappyDogStatus, Client, Division } from '@/lib/supabase/types'
 import { DIVISION_LABELS } from '@/lib/constants'
 import { useRealtimeTable } from '@/hooks/use-realtime-table'
 import { formatCurrency, calcMargin, formatDate } from '@/lib/utils'
+import { exportToCsv } from '@/lib/export-csv'
 
 export type OrderWithClient = HappyDogOrder & {
   clients: { name: string; division: Division } | null
@@ -215,18 +216,43 @@ export function HappyDogView({ initialOrders, clients }: Props) {
             White-label fulfillment — orders, margins, and delivery status
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'var(--accent)', color: '#fff',
-            border: 'none', borderRadius: 'var(--radius)', padding: '8px 14px',
-            fontSize: 12, fontWeight: 600, cursor: 'pointer', letterSpacing: '-0.01em',
-          }}
-        >
-          <Plus size={13} />
-          New Order
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => exportToCsv(`happydog-${new Date().toISOString().slice(0,10)}.csv`, orders.map(o => ({
+              Client: o.clients?.name ?? '',
+              Division: o.clients ? DIVISION_LABELS[o.clients.division] : '',
+              Deliverable: o.deliverable,
+              Status: o.status,
+              'HD Cost ($)': o.hd_cost ?? '',
+              'Client Price ($)': o.client_price ?? '',
+              'Margin (%)': o.margin != null ? o.margin.toFixed(1) : '',
+              Ordered: o.ordered_date ?? '',
+              Delivered: o.delivered_date ?? '',
+              Notes: o.notes ?? '',
+            })))}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'var(--surface-2)', border: '1px solid var(--border)',
+              color: 'var(--text-muted)', borderRadius: 'var(--radius)', padding: '8px 12px',
+              fontSize: 12, fontWeight: 500, cursor: 'pointer',
+            }}
+          >
+            <Download size={13} />
+            CSV
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'var(--accent)', color: '#fff',
+              border: 'none', borderRadius: 'var(--radius)', padding: '8px 14px',
+              fontSize: 12, fontWeight: 600, cursor: 'pointer', letterSpacing: '-0.01em',
+            }}
+          >
+            <Plus size={13} />
+            New Order
+          </button>
+        </div>
       </div>
 
       {/* KPI Strip */}

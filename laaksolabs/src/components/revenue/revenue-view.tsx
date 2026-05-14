@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import {
   DollarSign, TrendingUp, AlertCircle, CheckCircle,
-  ChevronLeft, ChevronRight, Plus, X, Save,
+  ChevronLeft, ChevronRight, Plus, X, Save, Download,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { RevenueEntry, RevenueStatus, RevenueType, Client, Division } from '@/lib/supabase/types'
@@ -11,6 +11,7 @@ import { useRealtimeTable } from '@/hooks/use-realtime-table'
 import { REVENUE_TARGET, DIVISION_LABELS, REVENUE_STATUS_LABELS } from '@/lib/constants'
 import { formatCurrency, formatCurrencyShort, getFirstOfMonth } from '@/lib/utils'
 import { RevenueChart } from '@/components/dashboard/revenue-chart'
+import { exportToCsv } from '@/lib/export-csv'
 
 export type EntryWithClient = RevenueEntry & {
   clients: { name: string; division: Division } | null
@@ -223,18 +224,40 @@ export function RevenueView({ initialEntries, clients }: Props) {
             MRR tracking, invoice status, and progress toward $200K
           </p>
         </div>
-        <button
-          onClick={() => setShowAdd(true)}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'var(--accent)', color: '#fff',
-            border: 'none', borderRadius: 'var(--radius)', padding: '8px 14px',
-            fontSize: 12, fontWeight: 600, cursor: 'pointer',
-          }}
-        >
-          <Plus size={13} />
-          Add Entry
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => exportToCsv(`revenue-${new Date().toISOString().slice(0,10)}.csv`, entries.map(e => ({
+              Client: e.clients?.name ?? '',
+              Division: e.clients ? DIVISION_LABELS[e.clients.division] : '',
+              'Amount ($)': e.amount,
+              Type: e.type,
+              Month: e.month.slice(0, 7),
+              Status: REVENUE_STATUS_LABELS[e.status],
+              Notes: e.notes ?? '',
+            })))}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'var(--surface-2)', border: '1px solid var(--border)',
+              color: 'var(--text-muted)', borderRadius: 'var(--radius)', padding: '8px 12px',
+              fontSize: 12, fontWeight: 500, cursor: 'pointer',
+            }}
+          >
+            <Download size={13} />
+            CSV
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'var(--accent)', color: '#fff',
+              border: 'none', borderRadius: 'var(--radius)', padding: '8px 14px',
+              fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}
+          >
+            <Plus size={13} />
+            Add Entry
+          </button>
+        </div>
       </div>
 
       {/* Overdue alert */}

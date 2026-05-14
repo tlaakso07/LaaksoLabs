@@ -7,18 +7,21 @@ import { QuickAddTask } from './quick-add-task'
 export function GlobalShortcuts() {
   const [paletteOpen, setPaletteOpen]   = useState(false)
   const [quickAddOpen, setQuickAddOpen] = useState(false)
+  const [paletteKey, setPaletteKey]     = useState(0)
+  const [quickAddKey, setQuickAddKey]   = useState(0)
 
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
-      // Cmd+K / Ctrl+K → command palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         setQuickAddOpen(false)
-        setPaletteOpen(p => !p)
+        setPaletteOpen(p => {
+          if (!p) setPaletteKey(k => k + 1)
+          return !p
+        })
         return
       }
 
-      // N → quick add task (only when not typing in a field)
       const tag = (e.target as HTMLElement).tagName
       const isEditable = (e.target as HTMLElement).isContentEditable
       if (
@@ -26,6 +29,7 @@ export function GlobalShortcuts() {
         !['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) && !isEditable
       ) {
         setPaletteOpen(false)
+        setQuickAddKey(k => k + 1)
         setQuickAddOpen(true)
       }
     }
@@ -35,8 +39,8 @@ export function GlobalShortcuts() {
 
   return (
     <>
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-      <QuickAddTask   open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
+      <CommandPalette key={paletteKey}  open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <QuickAddTask   key={quickAddKey} open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
     </>
   )
 }

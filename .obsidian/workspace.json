@@ -182,6 +182,7 @@
   },
   "active": "971ca9e141de807d",
   "lastOpenFiles": [
+    "laaksolabs/src/lib/export-csv.ts",
     "laaksolabs/src/components/layout/global-shortcuts.tsx",
     "laaksolabs/src/components/layout/quick-add-task.tsx",
     "laaksolabs/src/components/layout/command-palette.tsx",
@@ -193,7 +194,6 @@
     "laaksolabs/src/components/happydog/happydog-view.tsx",
     "laaksolabs/src/components/happydog",
     "laaksolabs/src/components/tasks/tasks-view.tsx",
-    "laaksolabs/src/components/tasks",
     "HOME.md",
     "Business/Revenue Targets.md",
     "Business/Happy Dog Media Group.md",

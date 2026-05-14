@@ -36,7 +36,6 @@ export function CommandPalette({ open, onClose }: Props) {
 
   useEffect(() => {
     if (!open) return
-    setQuery(''); setSelected(0)
     setTimeout(() => inputRef.current?.focus(), 10)
     const sb = createClient()
     sb.from('clients').select('*').then(({ data }) => setClients((data ?? []) as Client[]))
@@ -60,7 +59,6 @@ export function CommandPalette({ open, onClose }: Props) {
     return [...pages, ...matchedClients, ...matchedTasks]
   })()
 
-  useEffect(() => { setSelected(0) }, [query])
 
   const navigate = useCallback((item: ResultItem) => {
     router.push(item.href); onClose()
@@ -116,7 +114,7 @@ export function CommandPalette({ open, onClose }: Props) {
           <input
             ref={inputRef}
             value={query}
-            onChange={e => setQuery(e.target.value)}
+            onChange={e => { setQuery(e.target.value); setSelected(0) }}
             placeholder="Search pages, clients, tasks…"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',

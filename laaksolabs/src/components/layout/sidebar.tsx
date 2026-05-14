@@ -4,20 +4,21 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, CheckSquare,
-  Package, DollarSign, BookUser, Settings, Zap,
+  Package, DollarSign, BookUser, Settings, Zap, Megaphone,
 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { REVENUE_TARGET } from '@/lib/constants'
 import { formatCurrency } from '@/lib/utils'
 
 const NAV = [
-  { label: 'Dashboard',  href: '/',          icon: LayoutDashboard },
-  { label: 'Clients',    href: '/clients',   icon: Users },
-  { label: 'Tasks',      href: '/tasks',     icon: CheckSquare },
-  { label: 'Happy Dog',  href: '/happydog',  icon: Package },
-  { label: 'Revenue',    href: '/revenue',   icon: DollarSign },
-  { label: 'Contacts',   href: '/contacts',  icon: BookUser },
-  { label: 'Settings',   href: '/settings',  icon: Settings },
+  { label: 'Dashboard',  href: '/',            icon: LayoutDashboard },
+  { label: 'Clients',    href: '/clients',     icon: Users },
+  { label: 'Tasks',      href: '/tasks',       icon: CheckSquare },
+  { label: 'Happy Dog',  href: '/happydog',    icon: Package },
+  { label: 'Campaigns',  href: '/campaigns',   icon: Megaphone },
+  { label: 'Revenue',    href: '/revenue',     icon: DollarSign },
+  { label: 'Contacts',   href: '/contacts',    icon: BookUser },
+  { label: 'Settings',   href: '/settings',    icon: Settings },
 ]
 
 const BOTTOM_NAV = [
