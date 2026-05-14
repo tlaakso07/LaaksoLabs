@@ -39,8 +39,8 @@ export function GlobalShortcuts() {
 
   return (
     <>
-      <CommandPalette key={paletteKey}  open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-      <QuickAddTask   key={quickAddKey} open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
+      <CommandPalette key={`p-${paletteKey}`}  open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <QuickAddTask   key={`q-${quickAddKey}`} open={quickAddOpen} onClose={() => setQuickAddOpen(false)} />
     </>
   )
 }

@@ -36,10 +36,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        {/* Prevent flash of wrong theme */}
-        <script dangerouslySetInnerHTML={{
-          __html: `(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.dataset.theme=t;})()`
-        }} />
       </head>
       <body className="flex h-screen overflow-hidden">
         <div className="app-sidebar-wrap w-60 shrink-0 h-full">

@@ -4,14 +4,20 @@ import { useEffect, useState } from 'react'
 import { Sun, Moon } from 'lucide-react'
 
 export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window === 'undefined') return true
-    return (localStorage.getItem('theme') ?? 'dark') !== 'light'
-  })
+  const [mounted, setMounted] = useState(false)
+  const [isDark, setIsDark]   = useState(true)
 
   useEffect(() => {
+    const stored = (localStorage.getItem('theme') ?? 'dark') !== 'light'
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIsDark(stored)
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
     document.documentElement.dataset.theme = isDark ? 'dark' : 'light'
-  }, [isDark])
+  }, [isDark, mounted])
 
   const toggle = () => {
     const next = !isDark
@@ -24,7 +30,8 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-label="Toggle theme"
+      title={mounted ? (isDark ? 'Switch to light mode' : 'Switch to dark mode') : 'Toggle theme'}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -50,10 +57,10 @@ export function ThemeToggle() {
         el.style.color = 'var(--toggle-icon)'
       }}
     >
-      {isDark
+      {mounted && (isDark
         ? <Sun size={12} strokeWidth={1.75} />
         : <Moon size={12} strokeWidth={1.75} />
-      }
+      )}
     </button>
   )
 }

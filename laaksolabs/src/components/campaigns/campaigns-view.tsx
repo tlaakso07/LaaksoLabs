@@ -60,7 +60,7 @@ export function CampaignsView({ initialCampaigns, clients }: Props) {
   }
 
   return (
-    <div style={{ height: '100%', overflowY: 'auto', padding: '32px', background: 'var(--bg)' }}>
+    <div style={{ padding: '28px 32px', maxWidth: 1280, margin: '0 auto' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>

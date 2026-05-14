@@ -2,6 +2,8 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { CampaignsView } from '@/components/campaigns/campaigns-view'
 import type { Campaign, Client, Division } from '@/lib/supabase/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function CampaignsPage() {
   const supabase = createAdminClient()
   const [{ data: rawCampaigns }, { data: rawClients }] = await Promise.all([
