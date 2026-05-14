@@ -176,8 +176,11 @@
       "bases:Create new base": false
     }
   },
-  "active": "971ca9e141de807d",
+  "active": "441a658cec25417d",
   "lastOpenFiles": [
+    "laaksolabs/src/app/api/login/route.ts",
+    "laaksolabs/src/app/api/login",
+    "laaksolabs/src/app/api",
     "CLAUDE.md",
     "laaksolabs/src/lib/export-csv.ts",
     "laaksolabs/src/components/layout/global-shortcuts.tsx",
@@ -188,8 +191,6 @@
     "laaksolabs/src/components/contacts",
     "laaksolabs/src/components/revenue/revenue-view.tsx",
     "laaksolabs/src/components/revenue",
-    "laaksolabs/src/components/happydog/happydog-view.tsx",
-    "laaksolabs/src/components/happydog",
     "HOME.md",
     "Business/Revenue Targets.md",
     "Business/Happy Dog Media Group.md",
