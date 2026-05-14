@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import { Sidebar, BottomNav } from '@/components/layout/sidebar'
@@ -29,7 +30,10 @@ async function getCurrentMRR(): Promise<number> {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const currentMRR = await getCurrentMRR()
+  const h = await headers()
+  const pathname = h.get('x-pathname') ?? ''
+  const isAuthRoute = pathname === '/login'
+  const currentMRR = isAuthRoute ? 0 : await getCurrentMRR()
 
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
@@ -42,15 +46,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           __html: `try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}`
         }} />
       </head>
-      <body className="flex h-screen overflow-hidden">
-        <div className="app-sidebar-wrap w-60 shrink-0 h-full">
-          <Sidebar currentMRR={currentMRR} />
-        </div>
-        <main className="app-main flex-1 overflow-hidden flex flex-col">
-          {children}
-        </main>
-        <BottomNav />
-        <GlobalShortcuts />
+      <body className={isAuthRoute ? 'h-screen overflow-hidden' : 'flex h-screen overflow-hidden'}>
+        {isAuthRoute ? (
+          children
+        ) : (
+          <>
+            <div className="app-sidebar-wrap w-60 shrink-0 h-full">
+              <Sidebar currentMRR={currentMRR} />
+            </div>
+            <main className="app-main flex-1 overflow-hidden flex flex-col">
+              {children}
+            </main>
+            <BottomNav />
+            <GlobalShortcuts />
+          </>
+        )}
       </body>
     </html>
   )

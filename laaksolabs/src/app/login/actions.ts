@@ -29,6 +29,7 @@ export async function loginAction(_prev: { error?: string } | undefined, formDat
     path: '/',
     maxAge: SESSION_TTL_SECONDS,
   })
+  console.log('[login] cookie set, token length:', token.length, 'all cookies after set:', jar.getAll().map((c) => c.name))
 
   const safe = redirectTo.startsWith('/') && !redirectTo.startsWith('//') ? redirectTo : '/'
   redirect(safe)

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, CheckSquare,
-  Package, DollarSign, BookUser, Settings, Zap, Megaphone,
+  Package, DollarSign, BookUser, Settings, Zap, Megaphone, LogOut,
 } from 'lucide-react'
 import { ThemeToggle } from './theme-toggle'
 import { REVENUE_TARGET } from '@/lib/constants'
@@ -221,6 +221,39 @@ export function Sidebar({ currentMRR = 0 }: { currentMRR?: number }) {
           </span>
         </div>
       </div>
+
+      {/* Sign out */}
+      <a
+        href="/logout"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          margin: '0 12px 14px',
+          padding: '9px 12px',
+          borderRadius: '8px',
+          fontSize: '12px',
+          fontWeight: 500,
+          color: 'var(--sidebar-text-dim)',
+          background: 'transparent',
+          border: '1px solid var(--sidebar-border)',
+          textDecoration: 'none',
+          transition: 'background 100ms ease, color 100ms ease',
+        }}
+        onMouseEnter={e => {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = 'var(--sidebar-hover)'
+          el.style.color = 'var(--sidebar-text)'
+        }}
+        onMouseLeave={e => {
+          const el = e.currentTarget as HTMLElement
+          el.style.background = 'transparent'
+          el.style.color = 'var(--sidebar-text-dim)'
+        }}
+      >
+        <LogOut size={13} strokeWidth={1.75} style={{ color: 'var(--sidebar-accent)' }} />
+        Sign out
+      </a>
     </aside>
   )
 }
