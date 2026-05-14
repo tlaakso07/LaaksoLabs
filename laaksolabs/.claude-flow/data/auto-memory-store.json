@@ -1,0 +1,14 @@
+[
+  {
+    "id": "task-dashboard-premium-ui",
+    "key": "dashboard-premium-ui",
+    "content": "Task completed: dashboard-premium-ui",
+    "namespace": "tasks",
+    "type": "task-outcome",
+    "metadata": {
+      "success": true,
+      "quality": 0.85
+    },
+    "createdAt": 1778716828362
+  }
+]

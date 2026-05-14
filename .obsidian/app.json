@@ -1,0 +1,12 @@
+{
+  "promptDelete": false,
+  "defaultViewMode": "preview",
+  "livePreview": true,
+  "showLineNumber": false,
+  "foldHeading": false,
+  "newFileLocation": "root",
+  "newFileFolderPath": "",
+  "attachmentFolderPath": "Assets",
+  "useMarkdownLinks": false,
+  "showUnsupportedFiles": false
+}

@@ -1,0 +1,92 @@
+/**
+ * Laakso Labs — Design Tokens v1.0
+ * Generated from docs/brand-guidelines.md
+ * Do not edit directly — update brand-guidelines.md and regenerate.
+ */
+
+/* ─── Accent ─── */
+--ll-accent:          #B42020;
+--ll-accent-light:    #8B1515;
+--ll-accent-dim:      rgba(180, 32, 32, 0.14);
+
+/* ─── Backgrounds ─── */
+--ll-bg-dark:         #080808;
+--ll-bg-light:        #F5F5F5;
+
+/* ─── Surfaces (dark) ─── */
+--ll-surface-dark-1:  #141414;
+--ll-surface-dark-2:  #1E1E1E;
+--ll-surface-dark-3:  #282828;
+
+/* ─── Surfaces (light) ─── */
+--ll-surface-light-1: #FFFFFF;
+--ll-surface-light-2: #F5F5F5;
+--ll-surface-light-3: #EBEBEB;
+
+/* ─── Text (dark) ─── */
+--ll-text-dark:       #F4F0EC;
+--ll-text-dark-muted: #8A8884;
+--ll-text-dark-faint: #444440;
+
+/* ─── Text (light) ─── */
+--ll-text-light:       #0A0A0A;
+--ll-text-light-muted: #6A6A6A;
+--ll-text-light-faint: #AAAAAA;
+
+/* ─── Borders (dark) ─── */
+--ll-border-dark:        #2A2A2A;
+--ll-border-dark-subtle: #1E1E1E;
+--ll-border-dark-strong: #3A3A3A;
+
+/* ─── Borders (light) ─── */
+--ll-border-light:        #E4E4E4;
+--ll-border-light-subtle: #EEEEEE;
+--ll-border-light-strong: #CACACA;
+
+/* ─── Divisions ─── */
+--ll-div1-dark:  #5A8EC6;
+--ll-div1-light: #4A7EB5;
+--ll-div2-dark:  #8A78B4;
+--ll-div2-light: #7A6AA5;
+--ll-div3-dark:  #C4A06A;
+--ll-div3-light: #B08C52;
+
+/* ─── Status ─── */
+--ll-status-active:     #6B9E82;
+--ll-status-urgent:     #C05A52;
+--ll-status-high:       #BA7A45;
+--ll-status-medium:     #9B8B5A;
+--ll-status-low:        #5E5E5A;
+--ll-status-paused:     #C05A52;
+--ll-status-prospect:   #7A96B5;
+--ll-status-onboarding: #9B8B5A;
+
+/* ─── Typography ─── */
+--ll-font-sans: 'Geist', system-ui, sans-serif;
+--ll-font-mono: 'Geist Mono', monospace;
+
+--ll-size-kpi:     44px;
+--ll-size-h1:      24px;
+--ll-size-h2:      18px;
+--ll-size-h3:      14px;
+--ll-size-body:    13px;
+--ll-size-small:   12px;
+--ll-size-caption: 10px;
+
+/* ─── Radius ─── */
+--ll-radius-sm: 6px;
+--ll-radius-md: 10px;
+--ll-radius-lg: 14px;
+--ll-radius-xl: 18px;
+
+/* ─── Motion ─── */
+--ll-ease:        cubic-bezier(0.16, 1, 0.3, 1);
+--ll-dur-micro:   120ms;
+--ll-dur-base:    300ms;
+--ll-dur-long:    1200ms;
+
+/* ─── Layout ─── */
+--ll-max-width:      1600px;
+--ll-sidebar-width:  240px;
+--ll-panel-width:    380px;
+--ll-page-padding:   28px 32px;

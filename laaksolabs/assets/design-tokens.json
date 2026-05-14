@@ -1,0 +1,122 @@
+{
+  "brand": {
+    "name": "Laakso Labs",
+    "tagline": "Command Center",
+    "version": "1.0"
+  },
+  "colors": {
+    "accent": {
+      "dark": "#B42020",
+      "light": "#8B1515",
+      "dim": "rgba(180,32,32,0.14)"
+    },
+    "background": {
+      "dark": "#080808",
+      "light": "#F5F5F5"
+    },
+    "surface": {
+      "dark1": "#141414",
+      "dark2": "#1E1E1E",
+      "dark3": "#282828",
+      "light1": "#FFFFFF",
+      "light2": "#F5F5F5",
+      "light3": "#EBEBEB"
+    },
+    "border": {
+      "dark": "#2A2A2A",
+      "darkSubtle": "#1E1E1E",
+      "darkStrong": "#3A3A3A",
+      "light": "#E4E4E4",
+      "lightSubtle": "#EEEEEE",
+      "lightStrong": "#CACACA"
+    },
+    "text": {
+      "darkPrimary": "#F4F0EC",
+      "darkMuted": "#8A8884",
+      "darkFaint": "#444440",
+      "lightPrimary": "#0A0A0A",
+      "lightMuted": "#6A6A6A",
+      "lightFaint": "#AAAAAA"
+    },
+    "divisions": {
+      "div1": {
+        "name": "AI Design & Marketing",
+        "dark": "#5A8EC6",
+        "light": "#4A7EB5",
+        "label": "Marketing"
+      },
+      "div2": {
+        "name": "AI Consulting & SEO",
+        "dark": "#8A78B4",
+        "light": "#7A6AA5",
+        "label": "Consulting"
+      },
+      "div3": {
+        "name": "The Fund",
+        "dark": "#C4A06A",
+        "light": "#B08C52",
+        "label": "Fund"
+      }
+    },
+    "status": {
+      "active": "#6B9E82",
+      "urgent": "#C05A52",
+      "high": "#BA7A45",
+      "medium": "#9B8B5A",
+      "low": "#5E5E5A",
+      "paused": "#C05A52",
+      "prospect": "#7A96B5",
+      "onboarding": "#9B8B5A"
+    }
+  },
+  "typography": {
+    "fontSans": "Geist, system-ui, sans-serif",
+    "fontMono": "Geist Mono, monospace",
+    "scale": {
+      "kpiHero": { "size": "44px", "weight": 700, "family": "mono", "letterSpacing": "-0.03em" },
+      "h1": { "size": "24px", "weight": 600, "family": "sans", "letterSpacing": "-0.02em" },
+      "h2": { "size": "18px", "weight": 600, "family": "sans", "letterSpacing": "-0.015em" },
+      "h3": { "size": "14px", "weight": 600, "family": "sans", "letterSpacing": "-0.01em" },
+      "body": { "size": "13px", "weight": 400, "family": "sans", "letterSpacing": "-0.005em" },
+      "small": { "size": "12px", "weight": 400, "family": "sans", "letterSpacing": "0" },
+      "caption": { "size": "10px", "weight": 500, "family": "sans", "letterSpacing": "0.08em", "transform": "uppercase" },
+      "mono": { "size": "12px", "weight": 400, "family": "mono", "letterSpacing": "-0.02em" }
+    }
+  },
+  "spacing": {
+    "pagePadding": "28px 32px",
+    "cardPadding": "20px",
+    "cardGap": "16px",
+    "sectionGap": "24px"
+  },
+  "radius": {
+    "sm": "6px",
+    "md": "10px",
+    "lg": "14px",
+    "xl": "18px"
+  },
+  "motion": {
+    "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+    "durationMicro": "120ms",
+    "durationTransition": "300ms",
+    "durationProgress": "1200ms"
+  },
+  "layout": {
+    "maxWidth": "1600px",
+    "sidebarWidth": "240px",
+    "rightPanelWidth": "380px"
+  },
+  "logo": {
+    "icon": "Zap",
+    "iconSize": 13,
+    "iconStrokeWidth": 2,
+    "containerSize": "32px",
+    "containerRadius": "9px",
+    "wordmark": "Laakso Labs",
+    "submark": "Command Center"
+  },
+  "voice": {
+    "traits": ["Precise", "Confident", "Inevitable"],
+    "prohibitedTerms": ["Seamless", "Leverage", "Game-changer", "Synergy", "Unleash"]
+  }
+}
