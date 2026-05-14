@@ -43,6 +43,29 @@
 
 **Viktor integration:** No webhook needed — Viktor accesses the repo via GitHub and writes directly to Supabase using the service role key. Give Viktor: GitHub repo + `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` + CLAUDE.md for full context.
 
+---
+
+## Deployment — Vercel (In Progress)
+
+**Repo:** https://github.com/tlaakso07/LaaksoLabs.git
+**Vercel team:** tlaakso11-3399 (Hobby)
+**Project name:** laaksolabs
+**Current deployment URL:** https://laaksolabs-rm773kezn-tlaakso11-3399s-projects.vercel.app
+
+### Vercel Settings — Configured
+- Root Directory: `laaksolabs`
+- Framework Preset: Next.js (was "Other", caused the initial 404)
+
+### Vercel Settings — Still Needed
+1. Add 4 env vars (values in `laaksolabs/.env.local`):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_APP_URL`
+2. Redeploy with "Use existing build cache" **unchecked** so the Next.js framework setting applies.
+
+See `handoff/HANDOFF.md` for full deployment context.
+
 ### Color overrides (supersede original spec)
 | Element | Color |
 |---|---|
