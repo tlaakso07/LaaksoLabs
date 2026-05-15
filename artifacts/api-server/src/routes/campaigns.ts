@@ -1,5 +1,32 @@
+import { randomBytes } from "crypto";
 import { Router } from "express";
 import { requireAuth } from "../lib/require-auth";
+
+// ─── OAuth State Store ────────────────────────────────────────────────────────
+
+interface OAuthState {
+  client_id: string;
+  client_secret: string;
+  developer_token: string;
+  customer_id: string;
+  redirect_uri: string;
+  created_at: number;
+  refresh_token?: string;
+  error?: string;
+}
+
+const oauthStates = new Map<string, OAuthState>();
+
+// Clean up states older than 15 minutes
+setInterval(
+  () => {
+    const cutoff = Date.now() - 15 * 60 * 1000;
+    for (const [k, v] of oauthStates) {
+      if (v.created_at < cutoff) oauthStates.delete(k);
+    }
+  },
+  2 * 60 * 1000,
+);
 
 const router = Router();
 
@@ -87,6 +114,246 @@ function mapGoogleStatus(
     default:
       return "paused";
   }
+}
+
+// ─── Google OAuth helpers ─────────────────────────────────────────────────────
+
+/**
+ * POST /api/campaigns/google/auth-start
+ * Stores credentials in memory under a random state key, returns the Google
+ * OAuth authorization URL for the frontend to open in a new tab.
+ */
+router.post("/campaigns/google/auth-start", requireAuth, (req, res) => {
+  const { client_id, client_secret, developer_token, customer_id, redirect_uri } =
+    req.body as Record<string, string>;
+
+  if (!client_id || !client_secret || !developer_token || !customer_id || !redirect_uri) {
+    res.status(400).json({ error: "client_id, client_secret, developer_token, customer_id, and redirect_uri are required" });
+    return;
+  }
+
+  const state = randomBytes(20).toString("hex");
+  oauthStates.set(state, {
+    client_id,
+    client_secret,
+    developer_token,
+    customer_id,
+    redirect_uri,
+    created_at: Date.now(),
+  });
+
+  const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  authUrl.searchParams.set("client_id", client_id);
+  authUrl.searchParams.set("redirect_uri", redirect_uri);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("scope", "https://www.googleapis.com/auth/adwords");
+  authUrl.searchParams.set("access_type", "offline");
+  authUrl.searchParams.set("prompt", "consent");
+  authUrl.searchParams.set("state", state);
+
+  res.json({ auth_url: authUrl.toString(), state });
+});
+
+/**
+ * GET /api/campaigns/google/oauth-callback
+ * Google redirects here after the user grants access.
+ * Exchanges the code for tokens, stores the refresh token, returns a result page.
+ */
+router.get("/campaigns/google/oauth-callback", async (req, res) => {
+  const { code, state, error: oauthError } = req.query as Record<string, string>;
+
+  const stored = state ? oauthStates.get(state) : undefined;
+
+  if (oauthError) {
+    if (stored) { stored.error = oauthError; oauthStates.set(state, stored); }
+    res.send(oauthResultPage(null, oauthError));
+    return;
+  }
+
+  if (!stored || !code) {
+    res.status(400).send(oauthResultPage(null, "Invalid or expired session — please restart the connection flow."));
+    return;
+  }
+
+  try {
+    interface TokenExchangeResponse {
+      access_token?: string;
+      refresh_token?: string;
+      error?: string;
+      error_description?: string;
+    }
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: stored.client_id,
+        client_secret: stored.client_secret,
+        code,
+        redirect_uri: stored.redirect_uri,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    const tokenData = (await tokenRes.json()) as TokenExchangeResponse;
+
+    if (tokenData.refresh_token) {
+      stored.refresh_token = tokenData.refresh_token;
+      oauthStates.set(state, stored);
+      res.send(oauthResultPage(
+        {
+          refresh_token: tokenData.refresh_token,
+          client_id: stored.client_id,
+          client_secret: stored.client_secret,
+          developer_token: stored.developer_token,
+          customer_id: stored.customer_id,
+        },
+        null,
+      ));
+    } else {
+      const msg = tokenData.error_description ?? tokenData.error ?? "No refresh token returned";
+      stored.error = msg;
+      oauthStates.set(state, stored);
+      res.send(oauthResultPage(null, msg));
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (stored) { stored.error = msg; oauthStates.set(state, stored); }
+    res.send(oauthResultPage(null, msg));
+  }
+});
+
+/**
+ * GET /api/campaigns/google/oauth-status/:state
+ * Frontend polls this after the auth tab is opened.
+ * Returns pending | complete (with refresh_token) | error.
+ */
+router.get("/campaigns/google/oauth-status/:state", requireAuth, (req, res) => {
+  const stateKey = String(req.params.state);
+  const stored = oauthStates.get(stateKey);
+  if (!stored) {
+    res.json({ status: "expired" });
+    return;
+  }
+  if (stored.refresh_token) {
+    const result = {
+      status: "complete",
+      refresh_token: stored.refresh_token,
+      client_id: stored.client_id,
+      client_secret: stored.client_secret,
+      developer_token: stored.developer_token,
+      customer_id: stored.customer_id,
+    };
+    oauthStates.delete(stateKey);
+    res.json(result);
+  } else if (stored.error) {
+    res.json({ status: "error", error: stored.error });
+    oauthStates.delete(stateKey);
+  } else {
+    res.json({ status: "pending" });
+  }
+});
+
+// ─── OAuth result HTML page ────────────────────────────────────────────────────
+
+function oauthResultPage(
+  creds: {
+    refresh_token: string;
+    client_id: string;
+    client_secret: string;
+    developer_token: string;
+    customer_id: string;
+  } | null,
+  error: string | null,
+): string {
+  const bg = "#0f0f0f";
+  const surface = "#1a1a1a";
+  const border = "#2a2a2a";
+  const text = "#e8e8e8";
+  const muted = "#888";
+  const accent = "#B42020";
+  const green = "#22c55e";
+
+  if (error) {
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Google Ads — Connection Failed</title>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:${bg};color:${text};display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.card{background:${surface};border:1px solid ${border};border-radius:16px;padding:40px;max-width:480px;width:100%;text-align:center}
+h1{font-size:20px;font-weight:700;margin-bottom:8px;color:#ef4444}p{font-size:13px;color:${muted};line-height:1.6;margin-bottom:16px}
+.err{background:#1f0a0a;border:1px solid #3f1a1a;border-radius:8px;padding:12px 16px;font-size:12px;color:#ef8888;text-align:left;word-break:break-all}
+</style></head><body><div class="card"><h1>Connection Failed</h1><p>Something went wrong during Google authorization.</p><div class="err">${error}</div>
+<p style="margin-top:16px">Close this tab and try again from the Campaigns page.</p></div></body></html>`;
+  }
+
+  if (!creds) return "<p>Unknown error</p>";
+
+  const secrets = [
+    { label: "GOOGLE_ADS_DEVELOPER_TOKEN", value: creds.developer_token },
+    { label: "GOOGLE_ADS_CUSTOMER_ID", value: creds.customer_id },
+    { label: "GOOGLE_ADS_CLIENT_ID", value: creds.client_id },
+    { label: "GOOGLE_ADS_CLIENT_SECRET", value: creds.client_secret },
+    { label: "GOOGLE_ADS_REFRESH_TOKEN", value: creds.refresh_token },
+  ];
+
+  const rows = secrets.map(s => `
+    <div class="row">
+      <div class="key">${s.label}</div>
+      <div class="val-wrap"><code class="val" id="${s.label}">${s.value}</code>
+        <button onclick="copy('${s.label}')" class="copy-btn">Copy</button></div>
+    </div>`).join("");
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Google Ads Connected!</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:${bg};color:${text};min-height:100vh;padding:32px 16px}
+.wrap{max-width:600px;margin:0 auto}
+.badge{display:inline-flex;align-items:center;gap:6px;background:#0d2e1a;border:1px solid #1a5c35;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:${green};margin-bottom:20px}
+h1{font-size:24px;font-weight:700;margin-bottom:8px}
+p{font-size:13px;color:${muted};line-height:1.6;margin-bottom:24px}
+.card{background:${surface};border:1px solid ${border};border-radius:16px;padding:24px;margin-bottom:20px}
+.card-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:${muted};margin-bottom:16px}
+.row{display:flex;flex-direction:column;gap:4px;padding:12px 0;border-bottom:1px solid ${border}}
+.row:last-child{border-bottom:none}
+.key{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:${muted}}
+.val-wrap{display:flex;align-items:center;gap:8px}
+.val{font-size:12px;color:${text};flex:1;word-break:break-all;background:#111;padding:6px 10px;border-radius:6px;border:1px solid ${border}}
+.copy-btn{flex-shrink:0;padding:5px 12px;border-radius:6px;border:1px solid ${border};background:transparent;color:${muted};font-size:11px;font-weight:500;cursor:pointer}
+.copy-btn:hover{background:#2a2a2a;color:${text}}
+.steps{background:#0a1a0a;border:1px solid #1a3a1a;border-radius:12px;padding:20px}
+.steps-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${green};margin-bottom:12px}
+ol{padding-left:20px}li{font-size:13px;color:${muted};line-height:1.8}
+li strong{color:${text}}
+a{color:${accent};text-decoration:none}
+.close-hint{text-align:center;margin-top:24px;font-size:12px;color:${muted}}
+</style></head>
+<body><div class="wrap">
+  <div class="badge">✓ Authorization successful</div>
+  <h1>Google Ads Connected</h1>
+  <p>Copy each secret below and add it to your Replit project under <strong>Secrets</strong> (the lock icon in the sidebar). Then restart the API server.</p>
+  <div class="card">
+    <div class="card-title">Replit Secrets to set</div>
+    ${rows}
+  </div>
+  <div class="steps">
+    <div class="steps-title">Next steps</div>
+    <ol>
+      <li>Open your Replit project → click the <strong>lock (Secrets)</strong> icon in the sidebar</li>
+      <li>Add each secret above with the exact name shown</li>
+      <li>Restart the <strong>API Server</strong> workflow</li>
+      <li>Return to the <strong>Campaigns</strong> page — the Google card will show <strong>Connected</strong></li>
+      <li>Click <strong>Sync Now</strong> to pull your campaigns</li>
+    </ol>
+  </div>
+  <div class="close-hint">You can close this tab once you've saved all the secrets.</div>
+</div>
+<script>
+function copy(id){
+  const el=document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent.trim()).then(()=>{
+    const btn=el.nextElementSibling;btn.textContent='Copied!';btn.style.color='${green}';
+    setTimeout(()=>{btn.textContent='Copy';btn.style.color='';},2000);
+  });
+}
+</script>
+</body></html>`;
 }
 
 // ─── Routes ───────────────────────────────────────────────────────────────────

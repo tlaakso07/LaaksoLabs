@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Megaphone, Plus, CheckCircle, WifiOff, RefreshCw, DollarSign, Users, TrendingDown, BarChart2, X, Save, AlertCircle, Download } from 'lucide-react'
+import { Megaphone, Plus, CheckCircle, WifiOff, RefreshCw, DollarSign, Users, TrendingDown, BarChart2, X, Save, AlertCircle, Download, Plug } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import type { Campaign, CampaignPlatform, CampaignStatus, Client, Division } from '@/lib/supabase/types'
 import { DIVISION_LABELS } from '@/lib/constants'
 import { formatCurrency } from '@/lib/utils'
 import { exportToCsv } from '@/lib/export-csv'
+import { GoogleConnectWizard } from './GoogleConnectWizard'
 
 type CampaignWithClient = Campaign & { clients: { name: string; division: Division } | null }
 
@@ -213,7 +214,7 @@ function ImportModal({ newCampaigns, clients, onClose, onImport }: {
 
 // ─── Connection Card ───────────────────────────────────────────────────────────
 
-function ConnectionCard({ platform, label, description, color, connected, hint, syncState, onSync }: {
+function ConnectionCard({ platform, label, description, color, connected, hint, syncState, onSync, onConnect }: {
   platform: 'meta' | 'google'
   label: string
   description: string
@@ -222,6 +223,7 @@ function ConnectionCard({ platform, label, description, color, connected, hint, 
   hint: string | null
   syncState: SyncState
   onSync: () => void
+  onConnect?: () => void
 }) {
   const syncing = syncState.status === 'syncing'
   const success = syncState.status === 'success'
@@ -260,13 +262,21 @@ function ConnectionCard({ platform, label, description, color, connected, hint, 
           </div>
         )}
       </div>
-      {connected && (
-        <button onClick={onSync} disabled={syncing}
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 13px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, border: '1px solid', cursor: syncing ? 'default' : 'pointer', background: `${color}12`, color, borderColor: `${color}35`, whiteSpace: 'nowrap', opacity: syncing ? 0.6 : 1, flexShrink: 0 }}>
-          <RefreshCw size={11} style={{ animation: syncing ? 'spin 0.8s linear infinite' : 'none' }} />
-          {syncing ? 'Syncing...' : 'Sync Now'}
-        </button>
-      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
+        {connected && (
+          <button onClick={onSync} disabled={syncing}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 13px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, border: '1px solid', cursor: syncing ? 'default' : 'pointer', background: `${color}12`, color, borderColor: `${color}35`, whiteSpace: 'nowrap', opacity: syncing ? 0.6 : 1 }}>
+            <RefreshCw size={11} style={{ animation: syncing ? 'spin 0.8s linear infinite' : 'none' }} />
+            {syncing ? 'Syncing...' : 'Sync Now'}
+          </button>
+        )}
+        {!connected && onConnect && (
+          <button onClick={onConnect}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 13px', borderRadius: '6px', fontSize: '11px', fontWeight: 600, border: `1px solid ${color}35`, cursor: 'pointer', background: `${color}12`, color, whiteSpace: 'nowrap' }}>
+            <Plug size={11} /> Connect
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -280,6 +290,7 @@ export function CampaignsView({ initialCampaigns, clients }: {
   const [campaigns, setCampaigns] = useState(initialCampaigns)
   const [platform, setPlatform] = useState<CampaignPlatform | 'all'>('all')
   const [showAdd, setShowAdd] = useState(false)
+  const [showGoogleWizard, setShowGoogleWizard] = useState(false)
   const [connections, setConnections] = useState<ConnectionStatus | null>(null)
   const [metaSync, setMetaSync] = useState<SyncState>({ status: 'idle' })
   const [googleSync, setGoogleSync] = useState<SyncState>({ status: 'idle' })
@@ -435,6 +446,7 @@ export function CampaignsView({ initialCampaigns, clients }: {
           hint={connections?.google.hint ?? null}
           syncState={googleSync}
           onSync={() => syncPlatform('google')}
+          onConnect={() => setShowGoogleWizard(true)}
         />
       </div>
 
@@ -518,6 +530,7 @@ export function CampaignsView({ initialCampaigns, clients }: {
 
       {/* Modals */}
       {showAdd && <AddCampaignModal clients={clients} onClose={() => setShowAdd(false)} onAdd={handleAddManual} />}
+      {showGoogleWizard && <GoogleConnectWizard onClose={() => setShowGoogleWizard(false)} />}
       {importQueue.length > 0 && (
         <ImportModal
           newCampaigns={importQueue}
