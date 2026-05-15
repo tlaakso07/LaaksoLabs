@@ -71,7 +71,45 @@
 - Meta: `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID`
 - Google Ads: `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID`, `GOOGLE_ADS_CLIENT_ID`, `GOOGLE_ADS_CLIENT_SECRET`, `GOOGLE_ADS_REFRESH_TOKEN`
 
-**Migration `005_oauth_states.sql` must be applied** in Supabase before the Google connect wizard works. Meta sync needs no migration.
+**Migration `005_oauth_states.sql`** — ✅ applied 2026-05-15. Google connect wizard is now unblocked at the DB level. Meta sync needs no migration.
+
+### Enable sync — checklist (do when ready, in any order)
+
+The campaigns page works without these. Connection cards just show "Not Connected" until env vars are set.
+
+**Step A — Meta Ads sync** (~5 min)
+1. Open [Graph API Explorer](https://developers.facebook.com/tools/explorer/) → select your Business app → grant `ads_read` + `ads_management` permissions → click **Generate Access Token**.
+2. (Optional but recommended) Exchange the short-lived token for a 60-day token:
+   ```
+   curl "https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&client_id=APP_ID&client_secret=APP_SECRET&fb_exchange_token=SHORT_TOKEN"
+   ```
+3. Get the ad account ID from [Meta Ads Manager](https://adsmanager.facebook.com) URL (number after `act_`).
+4. Add both to Vercel (Production scope):
+   ```
+   vercel env add META_ACCESS_TOKEN production --value 'EAAxxxxx...' --yes
+   vercel env add META_AD_ACCOUNT_ID production --value '1234567890' --yes
+   ```
+5. Redeploy: `vercel deploy --prod --force --yes` (from repo root).
+6. Open `/campaigns` → Meta card should show **Connected** → click **Sync Now**.
+
+**Step B — Google Ads sync** (~10 min, wizard does most of it)
+1. Open `/campaigns` → click **Connect** on the Google Ads card.
+2. Wizard step 1: get Developer Token from [Google Ads → Tools → API Center](https://ads.google.com/aw/apicenter) (apply for Basic Access if first time).
+3. Wizard step 1: create OAuth client at [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) — Web application type, enable Google Ads API. Add `https://laaksolabs.vercel.app/api/campaigns/google/oauth-callback` to Authorized redirect URIs.
+4. Wizard step 2: paste Developer Token + Customer ID (from Google Ads top-right, dashes OK) + Client ID + Client Secret → click **Sign in with Google**.
+5. Google popup → authorize → success tab opens with 5 secrets and copy buttons.
+6. Paste all 5 into Vercel:
+   ```
+   vercel env add GOOGLE_ADS_DEVELOPER_TOKEN production --value '...' --yes
+   vercel env add GOOGLE_ADS_CUSTOMER_ID production --value '...' --yes
+   vercel env add GOOGLE_ADS_CLIENT_ID production --value '...' --yes
+   vercel env add GOOGLE_ADS_CLIENT_SECRET production --value '...' --yes
+   vercel env add GOOGLE_ADS_REFRESH_TOKEN production --value '...' --yes
+   ```
+7. Redeploy: `vercel deploy --prod --force --yes`.
+8. Google card on `/campaigns` shows **Connected** → click **Sync Now**.
+
+**If sync finds new campaigns** (ones not already in the DB), an Import modal pops up letting you assign each to a client before they're saved.
 
 ---
 
