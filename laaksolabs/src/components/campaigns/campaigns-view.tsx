@@ -192,7 +192,7 @@ export function CampaignsView({ initialCampaigns, clients, initialConnections }:
     <div style={{ padding: '28px 32px', maxWidth: 1600, margin: '0 auto' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
+      <div className="animate-in delay-0" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
             <Megaphone size={18} style={{ color: 'var(--accent)' }} />
@@ -223,7 +223,7 @@ export function CampaignsView({ initialCampaigns, clients, initialConnections }:
       </div>
 
       {/* Connection cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+      <div className="animate-in delay-1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
         <ConnectionCard
           label="Meta Ads" color={PLATFORM_COLORS.meta}
           description="Sync campaigns, spend, leads, and CTR from your Meta Ad Account"
@@ -244,7 +244,7 @@ export function CampaignsView({ initialCampaigns, clients, initialConnections }:
       </div>
 
       {/* KPI Strip */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }} className="kpi-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }} className="kpi-grid animate-in delay-2">
         {[
           { icon: <DollarSign size={13} />, label: 'Spend MTD',    value: formatCurrency(stats.spend),  sub: 'across all platforms' },
           { icon: <Users size={13} />,      label: 'Leads MTD',     value: String(stats.leads),          sub: 'total generated' },
@@ -266,7 +266,7 @@ export function CampaignsView({ initialCampaigns, clients, initialConnections }:
       </div>
 
       {/* Platform filter */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+      <div className="animate-in delay-3" style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
         {(['all', 'meta', 'google', 'other'] as const).map(p => (
           <button
             key={p}
@@ -285,7 +285,7 @@ export function CampaignsView({ initialCampaigns, clients, initialConnections }:
       </div>
 
       {/* Campaigns Table */}
-      <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }} className="table-scroll-wrap">
+      <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }} className="table-scroll-wrap animate-in delay-4">
         {filtered.length === 0 ? (
           <div style={{ padding: '60px 24px', textAlign: 'center' }}>
             <Megaphone size={28} style={{ color: 'var(--text-faint)', marginBottom: 12 }} />
