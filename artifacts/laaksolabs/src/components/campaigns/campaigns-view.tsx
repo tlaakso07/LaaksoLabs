@@ -74,7 +74,7 @@ export function CampaignsView({ initialCampaigns, clients }: { initialCampaigns:
   }
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: '1280px', margin: '0 auto' }}>
+    <div style={{ height: '100%', overflow: 'auto', padding: '28px 32px', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '28px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}><Megaphone size={18} style={{ color: 'var(--accent)' }} /><h1 style={{ fontSize: '22px', fontWeight: 700, color: 'var(--text)', margin: 0 }}>Campaigns</h1></div>

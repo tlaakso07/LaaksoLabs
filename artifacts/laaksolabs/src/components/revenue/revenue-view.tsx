@@ -87,7 +87,7 @@ export function RevenueView({ initialEntries, clients }: { initialEntries: Entry
   const canGoForward = selectedMonth < addMonths(getFirstOfMonth(), 2)
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: '1280px', margin: '0 auto' }}>
+    <div style={{ height: '100%', overflow: 'auto', padding: '28px 32px', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>

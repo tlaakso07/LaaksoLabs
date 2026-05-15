@@ -23,9 +23,9 @@ const INPUT: React.CSSProperties = { padding: '7px 10px', fontSize: '12px', back
 
 function KpiCard({ icon, label, value, sub, accent, delay }: { icon: React.ReactNode; label: string; value: string; sub: string; accent?: string; delay?: string }) {
   return (
-    <div className={`card animate-in ${delay ?? ''}`} style={{ padding: '18px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '10px', color: 'var(--text-muted)' }}>{icon}<span className="label">{label}</span></div>
-      <p className="num" style={{ fontSize: '24px', fontWeight: 700, color: accent ?? 'var(--text)', letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 4px' }}>{value}</p>
+    <div className={`card animate-in ${delay ?? ''}`} style={{ padding: '24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px', color: 'var(--text-muted)' }}>{icon}<span className="label">{label}</span></div>
+      <p className="num" style={{ fontSize: '36px', fontWeight: 700, color: accent ?? 'var(--text)', letterSpacing: '-0.04em', lineHeight: 1, margin: '0 0 8px' }}>{value}</p>
       <p style={{ fontSize: '11px', color: 'var(--text-faint)', margin: 0 }}>{sub}</p>
     </div>
   )
@@ -35,7 +35,6 @@ interface AddForm { client_id: string; deliverable: string; status: HappyDogStat
 const EMPTY_FORM: AddForm = { client_id: '', deliverable: '', status: 'not_ordered', hd_cost: '', client_price: '', ordered_date: '', notes: '' }
 
 export function HappyDogView({ initialOrders, clients }: { initialOrders: OrderWithClient[]; clients: Client[] }) {
-  const sb = createClient()
   const [orders, setOrders] = useRealtimeTable<OrderWithClient>('happydog_orders', initialOrders)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<HappyDogStatus | ''>('')
@@ -65,6 +64,7 @@ export function HappyDogView({ initialOrders, clients }: { initialOrders: OrderW
     if (!next) return
     setAdvancingId(order.id)
     try {
+      const sb = createClient()
       const update: Partial<HappyDogOrder> = { status: next }
       if (next === 'delivered') update.delivered_date = new Date().toISOString().split('T')[0]
       if (next === 'ordered') update.ordered_date = new Date().toISOString().split('T')[0]
@@ -77,6 +77,7 @@ export function HappyDogView({ initialOrders, clients }: { initialOrders: OrderW
     if (!form.client_id || !form.deliverable) return
     setSaving(true)
     try {
+      const sb = createClient()
       const hdCost = parseFloat(form.hd_cost) || null
       const clientPrice = parseFloat(form.client_price) || null
       const margin = hdCost != null && clientPrice != null ? calcMargin(hdCost, clientPrice) : null
@@ -86,7 +87,7 @@ export function HappyDogView({ initialOrders, clients }: { initialOrders: OrderW
   }
 
   return (
-    <div style={{ padding: '28px 32px', maxWidth: '1280px', margin: '0 auto' }}>
+    <div style={{ height: '100%', overflow: 'auto', padding: '28px 32px', boxSizing: 'border-box' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
