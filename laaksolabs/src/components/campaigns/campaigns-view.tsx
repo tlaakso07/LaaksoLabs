@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Megaphone, Plus, CheckCircle, WifiOff, RefreshCw, Plug,
   DollarSign, Users, TrendingDown, BarChart2, X, Save, AlertCircle, Download,
@@ -53,14 +53,15 @@ const PLATFORM_COLORS: Record<CampaignPlatform, string> = {
 interface Props {
   initialCampaigns: CampaignWithClient[]
   clients: Pick<Client, 'id' | 'name' | 'division'>[]
+  initialConnections: ConnectionStatus
 }
 
-export function CampaignsView({ initialCampaigns, clients }: Props) {
+export function CampaignsView({ initialCampaigns, clients, initialConnections }: Props) {
   const [campaigns, setCampaigns]               = useState(initialCampaigns)
   const [platform, setPlatform]                 = useState<CampaignPlatform | 'all'>('all')
   const [showAdd, setShowAdd]                   = useState(false)
   const [showGoogleWizard, setShowGoogleWizard] = useState(false)
-  const [connections, setConnections]           = useState<ConnectionStatus | null>(null)
+  const connections                             = initialConnections
   const [metaSync, setMetaSync]                 = useState<SyncState>({ status: 'idle' })
   const [googleSync, setGoogleSync]             = useState<SyncState>({ status: 'idle' })
   const [importQueue, setImportQueue]           = useState<NormalizedCampaign[]>([])
@@ -76,13 +77,6 @@ export function CampaignsView({ initialCampaigns, clients }: Props) {
       return withCpl.length ? withCpl.reduce((s, c) => s + (c.cost_per_lead ?? 0), 0) / withCpl.length : 0
     })(),
   }
-
-  useEffect(() => {
-    fetch('/api/campaigns/connections', { credentials: 'include' })
-      .then(r => r.json())
-      .then((d: ConnectionStatus) => setConnections(d))
-      .catch(() => {})
-  }, [])
 
   async function syncPlatform(plat: 'meta' | 'google') {
     const setState = plat === 'meta' ? setMetaSync : setGoogleSync
@@ -228,28 +222,26 @@ export function CampaignsView({ initialCampaigns, clients }: Props) {
         </div>
       </div>
 
-      {/* Connection cards — render only after status is loaded to avoid layout shift */}
-      {connections && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-          <ConnectionCard
-            label="Meta Ads" color={PLATFORM_COLORS.meta}
-            description="Sync campaigns, spend, leads, and CTR from your Meta Ad Account"
-            connected={connections.meta.connected}
-            hint={connections.meta.hint}
-            syncState={metaSync}
-            onSync={() => syncPlatform('meta')}
-          />
-          <ConnectionCard
-            label="Google Ads" color={PLATFORM_COLORS.google}
-            description="Pull campaign performance from Google Ads via OAuth refresh token"
-            connected={connections.google.connected}
-            hint={connections.google.hint}
-            syncState={googleSync}
-            onSync={() => syncPlatform('google')}
-            onConnect={() => setShowGoogleWizard(true)}
-          />
-        </div>
-      )}
+      {/* Connection cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <ConnectionCard
+          label="Meta Ads" color={PLATFORM_COLORS.meta}
+          description="Sync campaigns, spend, leads, and CTR from your Meta Ad Account"
+          connected={connections.meta.connected}
+          hint={connections.meta.hint}
+          syncState={metaSync}
+          onSync={() => syncPlatform('meta')}
+        />
+        <ConnectionCard
+          label="Google Ads" color={PLATFORM_COLORS.google}
+          description="Pull campaign performance from Google Ads via OAuth refresh token"
+          connected={connections.google.connected}
+          hint={connections.google.hint}
+          syncState={googleSync}
+          onSync={() => syncPlatform('google')}
+          onConnect={() => setShowGoogleWizard(true)}
+        />
+      </div>
 
       {/* KPI Strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }} className="kpi-grid">
