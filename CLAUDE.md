@@ -10,8 +10,8 @@
 
 ## Current Build Status
 
-**Last updated:** 2026-05-14
-**Status:** 🚀 **LIVE — in active use** — https://laaksolabs.vercel.app (auth-gated, single-user, real data)
+**Last updated:** 2026-05-15
+**Status:** 🚀 **LIVE — in active use** — https://laaksolabs.vercel.app (auth-gated, single-user, real data, live Meta + Google Ads sync)
 
 ### Done — Phase 1 & 2
 - Full design system (`globals.css`) — dark/light mode, CSS vars, animations, dot/badge/chip classes, `.live-dot` pulse class
@@ -36,7 +36,7 @@
 
 - [x] **Keyboard shortcuts** — `Cmd+K` command palette (searches pages/clients/tasks, arrow key nav, Enter to go), `N` quick-add task modal from anywhere (priority pills, category, due date, client). Both in `GlobalShortcuts` client wrapper rendered in `layout.tsx`. Settings page updated with accurate shortcut reference.
 - [x] **Export CSV** — `src/lib/export-csv.ts` utility. CSV button on Clients, Tasks, Happy Dog, Revenue pages. Downloads dated file with all visible data.
-- [x] **Campaigns page + Meta MCP placeholder** — `/campaigns` route + sidebar entry. Meta Ads MCP + Google Ads MCP connection cards (Not Connected state, endpoint URLs, Connect button). KPI strip, platform filter, campaigns table, Add Campaign modal. Infrastructure ready — flip `connected` flag when MCP is wired. `campaigns` table already exists in DB with anon RLS.
+- [x] **Campaigns page + Meta MCP placeholder** — `/campaigns` route + sidebar entry. Meta Ads MCP + Google Ads MCP connection cards (Not Connected state, endpoint URLs, Connect button). KPI strip, platform filter, campaigns table, Add Campaign modal. Infrastructure ready — flip `connected` flag when MCP is wired. `campaigns` table already exists in DB with anon RLS. **Superseded in Phase 6** by live Meta + Google Ads API sync.
 - [x] **Contacts inline edit** — hover any contact row → Edit button appears → inline form expands with all fields pre-filled (name, role, company, phone, email, linked client, notes) → saves to Supabase, updates state, collapses. Email display truncation fixed. Dynamic import replaced with static top-level import.
 - [x] **Final audit** — all `@/` import paths verified, all 9 nav routes confirmed, `.env.local` vars confirmed, zero ESLint errors, zero TypeScript compiler errors.
 
@@ -58,6 +58,21 @@
 
 **Revenue MRR-tracking flow:** `expected` → `invoiced` → `paid`. **Only `paid` entries count toward MRR** — the chart, MRR Progress %, and "Paid This Month" KPI filter for `status === 'paid'`. Entries in `expected` or `invoiced` show only under "Outstanding". This is intentional (MRR = recurring revenue *received*). To advance, click the status button on each row.
 
+### Phase 6 — LIVE AD-PLATFORM SYNC ✓ (2026-05-15)
+- [x] **Meta Marketing API sync** — `POST /api/campaigns/sync/meta` pulls campaigns + this-month insights (spend, CTR, leads via `lead` or `onsite_conversion.lead_grouped` actions, computed CPL) from Graph API v20, normalizes to `NormalizedCampaign[]`, returns to client which upserts to Supabase.
+- [x] **Google Ads OAuth flow** — 3 routes (`auth-start`, `oauth-callback`, `oauth-status/[state]`) backed by new `oauth_states` table (service-role only, migration `005`). 3-step `GoogleConnectWizard` modal walks user through Developer Token → Cloud OAuth client → authorize. Result page renders 5 secrets with copy-to-clipboard + Vercel env-var instructions.
+- [x] **Google Ads sync** — `POST /api/campaigns/sync/google` exchanges refresh token for access token, runs GAQL query (`segments.date DURING THIS_MONTH`), normalizes ENABLED/PAUSED status, converts micros to dollars.
+- [x] **Connection status API** — `GET /api/campaigns/connections` reads env vars, returns `{meta, google}: {connected, hint}`. UI uses this to show Connected pill + "Sync Now" button vs. Not Connected + required-vars list + "Connect" wizard launcher.
+- [x] **Import flow for new campaigns** — When sync finds campaigns not already in DB (matched by `platform + lowercase(name)`), modal pops up letting user assign each to a client before importing. Matched campaigns update silently (status/budget/spend/leads/CPL/CTR/last_synced).
+- [x] **Auth on all 6 routes** — New `src/lib/require-auth.ts` helper reuses existing HMAC `verifySession` to gate every campaign API route except `oauth-callback` (which Google calls directly with the state token).
+- [x] **Replit rewrite branch archived** — Replit Agent's parallel rewrite (Vite + Express monorepo, 18 commits, +25k lines) preserved on `replit-rewrite` branch on GitHub. Only the campaigns sync logic was ported back into the Next.js app; the rest was superseded by what already exists here.
+
+**Required env vars to enable sync** (all optional — campaigns page works without them, shows "Not Connected"):
+- Meta: `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID`
+- Google Ads: `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID`, `GOOGLE_ADS_CLIENT_ID`, `GOOGLE_ADS_CLIENT_SECRET`, `GOOGLE_ADS_REFRESH_TOKEN`
+
+**Migration `005_oauth_states.sql` must be applied** in Supabase before the Google connect wizard works. Meta sync needs no migration.
+
 ---
 
 ## Deployment — LIVE on Vercel
@@ -73,9 +88,9 @@
 - Framework Preset: Next.js
 - Deployment Protection: **OFF** (`ssoProtection: null`)
 - Preview Deployments: **OFF** (`previewDeploymentsDisabled: true`)
-- Env vars in Production + Preview + Development (7 total):
-  - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`
-  - `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_SECRET` (96 hex chars)
+- Env vars in Production + Preview + Development:
+  - **Core (7, required):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`, `AUTH_USERNAME`, `AUTH_PASSWORD`, `AUTH_SECRET` (96 hex chars)
+  - **Ad-platform sync (7, optional — set to enable Phase 6 features):** `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID`, `GOOGLE_ADS_DEVELOPER_TOKEN`, `GOOGLE_ADS_CUSTOMER_ID`, `GOOGLE_ADS_CLIENT_ID`, `GOOGLE_ADS_CLIENT_SECRET`, `GOOGLE_ADS_REFRESH_TOKEN`
 
 ### Redeploy commands
 ```bash
@@ -127,6 +142,35 @@ See `handoff/HANDOFF.md` for legacy deployment context (now stale — reflects p
 
 ### Known limitation
 The login screen protects the **UI**. The Supabase anon key is embedded in the client bundle (`NEXT_PUBLIC_*` env vars), and migration `004_anon_rls_policies` grants anon full CRUD. Someone who knows the URL + anon key could query Supabase directly without going through the app. To fully lock down later: tighten RLS to deny anon, refactor client mutations into server actions using service role, and either drop real-time updates or wire Supabase Auth properly.
+
+---
+
+## Campaigns Sync (Meta + Google Ads)
+
+**Endpoints:** all gated by `requireAuth` (cookie HMAC) except the OAuth callback, which Google calls directly with a state token.
+
+| File | Purpose |
+|---|---|
+| `src/lib/require-auth.ts` | Wraps existing `verifySession` for use inside Route Handlers. Returns `{ok: true}` or `{ok: false, status: 401}`. |
+| `src/app/api/campaigns/connections/route.ts` | GET — reads env-var presence, returns `{meta: {connected, hint}, google: {connected, hint}}`. |
+| `src/app/api/campaigns/sync/meta/route.ts` | POST — Graph API v20 `/campaigns` + `/insights` (date_preset=this_month). Returns normalized array. Client upserts to Supabase. |
+| `src/app/api/campaigns/sync/google/route.ts` | POST — refresh→access token swap, then GAQL query against `googleads.googleapis.com/v17`. |
+| `src/app/api/campaigns/google/auth-start/route.ts` | POST — generates random state via Web Crypto, writes `oauth_states` row with credentials, returns Google OAuth URL. |
+| `src/app/api/campaigns/google/oauth-callback/route.ts` | GET — Google redirects here. Exchanges code for refresh_token, stores it back to `oauth_states` row, renders HTML success page with 5 secrets + Vercel env-var instructions. Renders error page on failure. |
+| `src/app/api/campaigns/google/oauth-status/[state]/route.ts` | GET — polled by `GoogleConnectWizard` every 2 s. Returns `pending` / `complete` / `error` / `expired`. Deletes row on complete or error. |
+| `src/components/campaigns/google-connect-wizard.tsx` | Client modal — 3 steps (prereqs → credentials → authorizing) → done or error. Opens Google sign-in in `window.open` popup. |
+| `src/components/campaigns/campaigns-view.tsx` | `ConnectionCard` pair, `ImportModal`, `AddCampaignModal`. `syncPlatform()` diffs synced campaigns vs. local state by `platform + lowercase(name)` — matches update silently, new ones queue for import. |
+| `supabase/migrations/005_oauth_states.sql` | Service-role-only `oauth_states` table. No RLS policies, so anon and authenticated can't read or write. 15-minute TTL enforced inside handlers (no separate cleanup job). |
+
+**Why a Supabase table instead of an in-process Map:** Vercel serverless invocations may hit different instances. The Replit source used `new Map<state, OAuthState>()` which would silently fail on Vercel between the `auth-start` invocation and the `oauth-callback` invocation. The `oauth_states` table guarantees both reach the same state.
+
+**Why no OAuth flow for Meta:** Meta uses a long-lived access token you generate manually in the Graph API Explorer. No browser handshake needed — paste token + ad account ID into Vercel env, redeploy, done.
+
+**Adding a Meta token:** Graph API Explorer → select your app → permissions `ads_read` + `ads_management` → "Generate Access Token". For long-lived (60-day) token, exchange it via `https://graph.facebook.com/v20.0/oauth/access_token?grant_type=fb_exchange_token&...`.
+
+**Refreshing the Google refresh token:** if revoked, re-run the connect wizard. New refresh token replaces the env var.
+
+---
 
 ### Color overrides (supersede original spec)
 | Element | Color |
