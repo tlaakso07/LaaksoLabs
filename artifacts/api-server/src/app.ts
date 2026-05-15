@@ -26,7 +26,17 @@ app.use(
     },
   }),
 );
-app.use(cors({ origin: true, credentials: true }));
+const ALLOWED_ORIGIN = process.env.FRONTEND_ORIGIN ?? null;
+app.use(
+  cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (!ALLOWED_ORIGIN) return cb(null, true);
+      cb(null, origin === ALLOWED_ORIGIN);
+    },
+    credentials: true,
+  }),
+);
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

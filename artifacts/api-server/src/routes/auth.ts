@@ -71,7 +71,7 @@ router.post("/login", (req, res) => {
   const token = signToken({ user: username, exp });
   res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "lax",
     secure: isProduction,
     maxAge: SESSION_TTL_MS,
     path: "/",
