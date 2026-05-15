@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRoute } from 'wouter'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import { ClientsView } from '@/components/clients/clients-view'
 import { ClientDetail } from '@/components/clients/client-detail'
 import type { Client, Task, HappyDogOrder, ActivityLog } from '@/lib/supabase/types'
@@ -22,24 +22,32 @@ export default function ClientsPage() {
   const [detail, setDetail] = useState<DetailState | null>(null)
 
   useEffect(() => {
-    const sb = createClient()
-    if (clientId) {
-      Promise.all([
-        sb.from('clients').select('*').eq('id', clientId).single(),
-        sb.from('tasks').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
-        sb.from('happydog_orders').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
-        sb.from('activity_log').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
-      ]).then(([{ data: client }, { data: tasks }, { data: orders }, { data: activity }]) => {
-        if (client) setDetail({
-          client: client as Client,
-          initialTasks: (tasks ?? []) as Task[],
-          initialOrders: (orders ?? []) as HappyDogOrder[],
-          initialActivity: (activity ?? []) as ActivityLog[],
-        })
-      })
-    } else {
-      sb.from('clients').select('*').order('name').then(({ data }) => setClients((data ?? []) as Client[]))
+    if (!isSupabaseConfigured()) return
+    async function load() {
+      try {
+        const sb = createClient()
+        if (clientId) {
+          const [{ data: client }, { data: tasks }, { data: orders }, { data: activity }] = await Promise.all([
+            sb.from('clients').select('*').eq('id', clientId).single(),
+            sb.from('tasks').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+            sb.from('happydog_orders').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+            sb.from('activity_log').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
+          ])
+          if (client) setDetail({
+            client: client as Client,
+            initialTasks: (tasks ?? []) as Task[],
+            initialOrders: (orders ?? []) as HappyDogOrder[],
+            initialActivity: (activity ?? []) as ActivityLog[],
+          })
+        } else {
+          const { data } = await sb.from('clients').select('*').order('name')
+          setClients((data ?? []) as Client[])
+        }
+      } catch (err) {
+        console.error('[clients] load failed:', err)
+      }
     }
+    load()
   }, [clientId])
 
   if (clientId) {

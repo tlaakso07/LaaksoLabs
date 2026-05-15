@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { TaskPriority, TaskCategory, Client } from '@/lib/supabase/types'
 import { TASK_PRIORITY_COLORS } from '@/lib/constants'
 
@@ -22,15 +22,16 @@ export function QuickAddTask({ open, onClose }: Props) {
   useEffect(() => {
     if (!open) return
     setTimeout(() => inputRef.current?.focus(), 10)
+    if (!isSupabaseConfigured()) return
     createClient().from('clients').select('id, name').eq('status', 'active')
-      .then(({ data }) => setClients((data ?? []) as Client[]))
+      .then(({ data }: { data: unknown[] | null }) => setClients((data ?? []) as Client[]))
   }, [open])
 
   useEffect(() => {
     if (!open) return
     const handle = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { onClose(); return }
-      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && title.trim()) {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && title.trim() && isSupabaseConfigured()) {
         setSaving(true)
         createClient().from('tasks').insert({
           title: title.trim(), priority, category, status: 'todo',

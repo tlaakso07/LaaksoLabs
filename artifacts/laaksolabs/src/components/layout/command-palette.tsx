@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useLocation } from 'wouter'
 import { Search, LayoutDashboard, Users, CheckSquare, Package, DollarSign, BookUser, Settings } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { Client, Task, TaskPriority } from '@/lib/supabase/types'
 import { TASK_PRIORITY_COLORS } from '@/lib/constants'
 
@@ -34,9 +34,10 @@ export function CommandPalette({ open, onClose }: Props) {
   useEffect(() => {
     if (!open) return
     setTimeout(() => inputRef.current?.focus(), 10)
+    if (!isSupabaseConfigured()) return
     const sb = createClient()
-    sb.from('clients').select('*').then(({ data }) => setClients((data ?? []) as Client[]))
-    sb.from('tasks').select('*').neq('status', 'done').then(({ data }) => setTasks((data ?? []) as Task[]))
+    sb.from('clients').select('*').then(({ data }: { data: unknown[] | null }) => setClients((data ?? []) as Client[]))
+    sb.from('tasks').select('*').neq('status', 'done').then(({ data }: { data: unknown[] | null }) => setTasks((data ?? []) as Task[]))
   }, [open])
 
   const results: ResultItem[] = (() => {

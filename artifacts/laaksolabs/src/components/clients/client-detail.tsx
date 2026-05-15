@@ -33,7 +33,6 @@ export function ClientDetail({ client: initialClient, initialTasks, initialOrder
   const [editMode, setEditMode] = useState(false)
   const [editForm, setEditForm] = useState<Partial<Client>>({})
   const [saving, setSaving] = useState(false)
-  const sb = createClient()
 
   function startEdit() {
     setEditForm({ name: client.name, owner_name: client.owner_name ?? '', division: client.division, status: client.status, retainer_amount: client.retainer_amount ?? undefined, phone: client.phone ?? '', email: client.email ?? '', website: client.website ?? '', location: client.location ?? '', notes: client.notes ?? '' })
@@ -42,6 +41,7 @@ export function ClientDetail({ client: initialClient, initialTasks, initialOrder
 
   async function saveEdit() {
     setSaving(true)
+    const sb = createClient()
     const { data, error } = await sb.from('clients').update({ ...editForm, updated_at: new Date().toISOString() }).eq('id', client.id).select().single()
     if (!error && data) setClient(data as Client)
     setSaving(false); setEditMode(false)
@@ -49,20 +49,24 @@ export function ClientDetail({ client: initialClient, initialTasks, initialOrder
 
   async function completeTask(id: string) {
     setTasks(prev => prev.map(t => t.id === id ? { ...t, status: 'done', completed_at: new Date().toISOString() } : t))
+    const sb = createClient()
     await sb.from('tasks').update({ status: 'done', completed_at: new Date().toISOString() }).eq('id', id)
   }
 
   async function addTask(payload: { title: string; priority: TaskPriority; category: TaskCategory; due_date: string }) {
+    const sb = createClient()
     const { data } = await sb.from('tasks').insert({ ...payload, client_id: client.id, status: 'todo', description: null, completed_at: null }).select().single()
     if (data) setTasks(prev => [data as Task, ...prev])
   }
 
   async function updateOrderStatus(id: string, status: HappyDogStatus) {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o))
+    const sb = createClient()
     await sb.from('happydog_orders').update({ status }).eq('id', id)
   }
 
   async function logActivity(type: ActivityType, content: string) {
+    const sb = createClient()
     const { data } = await sb.from('activity_log').insert({ client_id: client.id, type, content }).select().single()
     if (data) setActivity(prev => [data as ActivityLog, ...prev])
   }
@@ -129,7 +133,7 @@ export function ClientDetail({ client: initialClient, initialTasks, initialOrder
         {tab === 'tasks' && <TasksTab openTasks={openTasks} doneTasks={doneTasks} onComplete={completeTask} onAdd={addTask} />}
         {tab === 'happydog' && <HappyDogTab orders={orders} onStatusChange={updateOrderStatus} />}
         {tab === 'activity' && <ActivityTab activity={activity} onLog={logActivity} />}
-        {tab === 'notes' && <NotesTab client={client} onSave={async (notes) => { const { data } = await sb.from('clients').update({ notes, updated_at: new Date().toISOString() }).eq('id', client.id).select().single(); if (data) setClient(data as Client) }} />}
+        {tab === 'notes' && <NotesTab client={client} onSave={async (notes) => { const sb = createClient(); const { data } = await sb.from('clients').update({ notes, updated_at: new Date().toISOString() }).eq('id', client.id).select().single(); if (data) setClient(data as Client) }} />}
       </div>
     </div>
   )
