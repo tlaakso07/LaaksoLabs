@@ -12,18 +12,18 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
     <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-strong)', borderRadius: '10px', padding: '12px 14px', boxShadow: 'var(--shadow-elevated)' }}>
       <p className="label" style={{ marginBottom: '8px' }}>{label}</p>
       {payload.map((p) => (
-        <div key={p.dataKey} className="flex items-center justify-between gap-8" style={{ marginBottom: '3px' }}>
-          <div className="flex items-center gap-2">
+        <div key={p.dataKey} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '32px', marginBottom: '3px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: p.color, flexShrink: 0 }} />
             <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{p.name}</span>
           </div>
-          <span className="num font-medium" style={{ fontSize: '12px', color: 'var(--text)' }}>{formatCurrencyShort(p.value)}</span>
+          <span className="num" style={{ fontSize: '12px', color: 'var(--text)', fontWeight: 500 }}>{formatCurrencyShort(p.value)}</span>
         </div>
       ))}
       {total > 0 && (
         <div style={{ borderTop: '1px solid var(--border)', marginTop: '8px', paddingTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Total MRR</span>
-          <span className="num font-semibold" style={{ fontSize: '13px', color: '#B42020' }}>{formatCurrencyShort(total)}</span>
+          <span className="num" style={{ fontSize: '13px', color: '#B42020', fontWeight: 600 }}>{formatCurrencyShort(total)}</span>
         </div>
       )}
     </div>

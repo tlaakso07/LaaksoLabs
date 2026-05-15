@@ -24,12 +24,12 @@ export function ActivityFeed({ entries: initialEntries }: { entries: ActivityEnt
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div>
           <h2 style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.01em', marginBottom: '2px' }}>Recent Activity</h2>
           <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Across all clients</p>
         </div>
-        <div className="flex items-center gap-1.5" title="Live updates">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} title="Live updates">
           <span className="live-dot" />
           <span style={{ fontSize: '10px', color: 'var(--active)', fontWeight: 600, letterSpacing: '0.04em' }}>LIVE</span>
         </div>
@@ -44,13 +44,13 @@ export function ActivityFeed({ entries: initialEntries }: { entries: ActivityEnt
           {entries.map((entry, i) => {
             const color = TYPE_COLOR[entry.type] ?? 'var(--text-muted)'
             return (
-              <div key={entry.id} className="flex items-start gap-3 py-2.5" style={{ borderBottom: i < entries.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
+              <div key={entry.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '10px 0', borderBottom: i < entries.length - 1 ? '1px solid var(--border-subtle)' : 'none' }}>
                 <div style={{ width: '24px', height: '24px', borderRadius: '7px', background: `color-mix(in srgb, ${color} 12%, var(--surface-2))`, color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
                   {ICON_MAP[entry.type] ?? <FileText size={10} />}
                 </div>
-                <div className="flex-1 min-w-0">
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ fontSize: '12px', color: 'var(--text)', lineHeight: 1.4 }}>{entry.content}</p>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '2px' }}>
                     {entry.clients?.name && <span style={{ fontSize: '11px', color: 'var(--div1)' }}>{entry.clients.name}</span>}
                     <span className="num" style={{ fontSize: '11px', color: 'var(--text-faint)' }}>{timeAgo(entry.created_at)} ago</span>
                   </div>
