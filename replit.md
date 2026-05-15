@@ -9,7 +9,7 @@ A private business dashboard for Laakso Labs — manage clients, tasks, revenue,
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - Required env: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` — Supabase project credentials
-- Optional env: `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` — auth config (defaults: admin / laakso2024)
+- Required secrets: `SESSION_SECRET`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` — auth config (no defaults; server exits in production if missing, warns in dev)
 
 ## Stack
 
