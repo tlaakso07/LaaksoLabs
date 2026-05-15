@@ -203,6 +203,8 @@ export function HappyDogView({ initialOrders, clients }: Props) {
   }
 
   return (
+    <div className="flex flex-col h-full">
+    <div className="flex-1 overflow-auto">
     <div style={{ padding: '28px 32px', maxWidth: 1600, margin: '0 auto' }}>
 
       {/* Header */}
@@ -748,6 +750,8 @@ export function HappyDogView({ initialOrders, clients }: Props) {
           </div>
         </div>
       )}
+    </div>
+    </div>
     </div>
   )
 }
