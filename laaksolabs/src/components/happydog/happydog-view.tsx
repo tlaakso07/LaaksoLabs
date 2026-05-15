@@ -750,7 +750,7 @@ export function HappyDogView({ initialOrders, clients }: Props) {
           </div>
         </div>
       )}
-    </div>
+      </div>
     </div>
     </div>
   )

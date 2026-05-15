@@ -77,6 +77,8 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
 
 export function RevenueChart({ data }: { data: ChartDataPoint[] }) {
   const hasData = data.some(d => d.total > 0)
+  const maxTotal = Math.max(...data.map(d => d.total))
+  const showTarget = maxTotal >= REVENUE_TARGET * 0.1
 
   return (
     <div className="h-full flex flex-col">
@@ -170,13 +172,15 @@ export function RevenueChart({ data }: { data: ChartDataPoint[] }) {
                 width={52}
               />
               <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border-strong)', strokeWidth: 1 }} />
-              <ReferenceLine
-                y={REVENUE_TARGET}
-                stroke="#B42020"
-                strokeDasharray="4 3"
-                strokeWidth={1}
-                label={{ value: '$200K', position: 'insideTopRight', fill: '#B42020', fontSize: 10, fontFamily: 'var(--font-geist-mono)', dy: -4 }}
-              />
+              {showTarget && (
+                <ReferenceLine
+                  y={REVENUE_TARGET}
+                  stroke="#B42020"
+                  strokeDasharray="4 3"
+                  strokeWidth={1}
+                  label={{ value: '$200K', position: 'insideTopRight', fill: '#B42020', fontSize: 10, fontFamily: 'var(--font-geist-mono)', dy: -4 }}
+                />
+              )}
               <Area type="monotone" dataKey="div1" name="Marketing" stackId="1" stroke="#5A8EC6" strokeWidth={1.5} fill="url(#g-div1)" />
               <Area type="monotone" dataKey="div2" name="Consulting" stackId="1" stroke="#8A78B4" strokeWidth={1.5} fill="url(#g-div2)" />
               <Area type="monotone" dataKey="div3" name="Fund" stackId="1" stroke="#B08C52" strokeWidth={1.5} fill="url(#g-div3)" />
