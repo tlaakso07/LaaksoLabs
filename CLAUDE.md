@@ -10,8 +10,8 @@
 
 ## Current Build Status
 
-**Last updated:** 2026-05-13
-**Status:** 🚀 **LAUNCHED** — https://laaksolabs.vercel.app (auth-gated, single-user)
+**Last updated:** 2026-05-14
+**Status:** 🚀 **LIVE — in active use** — https://laaksolabs.vercel.app (auth-gated, single-user, real data)
 
 ### Done — Phase 1 & 2
 - Full design system (`globals.css`) — dark/light mode, CSS vars, animations, dot/badge/chip classes, `.live-dot` pulse class
@@ -50,6 +50,13 @@
 - [x] **Preview deployments disabled** — `previewDeploymentsDisabled: true`. Only `main` branch builds.
 - [x] **Auth gate / login screen** — Username/password gate over the entire dashboard. HMAC-signed cookie session (Web Crypto, Edge-runtime safe, no extra deps). Sign-out link in sidebar footer. Single user (creds in env vars, never in repo).
 - [x] **Playwright smoke tests** — all 9 routes pass: unauth redirects to /login, wrong creds shows error, correct creds sets cookie + dashboard renders, navigation works authenticated, logout clears cookie + redirects.
+
+### Phase 5 — GOING LIVE WITH REAL DATA ✓ (2026-05-14)
+- [x] **Full seed wipe** — TRUNCATE-equivalent DELETE on all 7 tables via PostgREST + service role: `activity_log`, `tasks`, `happydog_orders`, `revenue_entries`, `campaigns`, `contacts`, `clients`. From 18 seeded rows → 0. Blank-slate smoke test confirmed every page renders cleanly with zero data and zero console errors.
+- [x] **Real entities re-added** — Polish & Shine Exteriors (client, Div 1, Onboarding, owner Dom, (253) 237-2709, polishandshineexteriors@gmail.com, Federal Way WA, retainer pending). Dom (Client Owner contact linked to Polish & Shine). Ryan (White-Label Partner contact, Happy Dog Media Group).
+- [x] **First revenue entries** — 2 expected entries for May 2026 totaling $4,999: $999/mo retainer ("Monthly Maintenance") + $4,000 project ("Website, 2 Landing Pages, Google/Meta Ads Set up"). Both `expected`, awaiting invoice → payment.
+
+**Revenue MRR-tracking flow:** `expected` → `invoiced` → `paid`. **Only `paid` entries count toward MRR** — the chart, MRR Progress %, and "Paid This Month" KPI filter for `status === 'paid'`. Entries in `expected` or `invoiced` show only under "Outstanding". This is intentional (MRR = recurring revenue *received*). To advance, click the status button on each row.
 
 ---
 
