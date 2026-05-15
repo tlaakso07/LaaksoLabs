@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Laakso Labs"
+version = "1.0.0"
+id = "artifacts/laaksolabs"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18651
+
+[services.development]
+run = "pnpm --filter @workspace/laaksolabs run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/laaksolabs", "run", "build" ]
+publicDir = "artifacts/laaksolabs/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18651"
+BASE_PATH = "/"
