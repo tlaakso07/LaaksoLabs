@@ -21,7 +21,7 @@ export default function LoginPage() {
     setLoading(true); setError('')
     const result = await login(username, password)
     if (result.ok) {
-      navigate('/')
+      window.location.href = '/'
     } else {
       setError(result.error ?? 'Login failed.')
       setLoading(false)
