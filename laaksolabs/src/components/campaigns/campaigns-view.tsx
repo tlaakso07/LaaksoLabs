@@ -228,26 +228,28 @@ export function CampaignsView({ initialCampaigns, clients }: Props) {
         </div>
       </div>
 
-      {/* Connection cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-        <ConnectionCard
-          label="Meta Ads" color={PLATFORM_COLORS.meta}
-          description="Sync campaigns, spend, leads, and CTR from your Meta Ad Account"
-          connected={connections?.meta.connected ?? false}
-          hint={connections?.meta.hint ?? null}
-          syncState={metaSync}
-          onSync={() => syncPlatform('meta')}
-        />
-        <ConnectionCard
-          label="Google Ads" color={PLATFORM_COLORS.google}
-          description="Pull campaign performance from Google Ads via OAuth refresh token"
-          connected={connections?.google.connected ?? false}
-          hint={connections?.google.hint ?? null}
-          syncState={googleSync}
-          onSync={() => syncPlatform('google')}
-          onConnect={() => setShowGoogleWizard(true)}
-        />
-      </div>
+      {/* Connection cards — render only after status is loaded to avoid layout shift */}
+      {connections && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+          <ConnectionCard
+            label="Meta Ads" color={PLATFORM_COLORS.meta}
+            description="Sync campaigns, spend, leads, and CTR from your Meta Ad Account"
+            connected={connections.meta.connected}
+            hint={connections.meta.hint}
+            syncState={metaSync}
+            onSync={() => syncPlatform('meta')}
+          />
+          <ConnectionCard
+            label="Google Ads" color={PLATFORM_COLORS.google}
+            description="Pull campaign performance from Google Ads via OAuth refresh token"
+            connected={connections.google.connected}
+            hint={connections.google.hint}
+            syncState={googleSync}
+            onSync={() => syncPlatform('google')}
+            onConnect={() => setShowGoogleWizard(true)}
+          />
+        </div>
+      )}
 
       {/* KPI Strip */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }} className="kpi-grid">
