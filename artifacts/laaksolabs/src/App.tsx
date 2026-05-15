@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Switch, Route, useLocation } from 'wouter'
-import { Sidebar } from '@/components/layout/sidebar'
+import { Sidebar, BottomNav } from '@/components/layout/sidebar'
 import { GlobalShortcuts } from '@/components/layout/global-shortcuts'
 import { checkAuth } from '@/lib/auth'
+import { getMRRByMonth } from '@/lib/supabase/queries/revenue'
 import LoginPage from '@/pages/login'
 import DashboardPage from '@/pages/dashboard'
 import ClientsPage from '@/pages/clients'
@@ -31,15 +32,18 @@ function NotFound() {
   )
 }
 
-function AppShell({ children }: { children: React.ReactNode }) {
+function AppShell({ children, currentMRR }: { children: React.ReactNode; currentMRR: number }) {
   return (
     <>
       <GlobalShortcuts />
-      <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: 'var(--bg)' }}>
-        <Sidebar />
-        <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-          {children}
-        </main>
+      <div style={{ display: 'flex', height: '100dvh', overflow: 'hidden', background: 'var(--bg)', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          <Sidebar currentMRR={currentMRR} />
+          <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            {children}
+          </main>
+        </div>
+        <BottomNav />
       </div>
     </>
   )
@@ -47,11 +51,21 @@ function AppShell({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const [authState, setAuthState] = useState<'loading' | 'authed' | 'unauthed'>('loading')
+  const [currentMRR, setCurrentMRR] = useState(0)
   const [location] = useLocation()
 
   useEffect(() => {
     checkAuth().then(ok => setAuthState(ok ? 'authed' : 'unauthed'))
   }, [location])
+
+  useEffect(() => {
+    if (authState !== 'authed') return
+    getMRRByMonth(1)
+      .then(rows => {
+        if (rows.length > 0) setCurrentMRR(rows[rows.length - 1].total)
+      })
+      .catch(() => {})
+  }, [authState])
 
   if (authState === 'loading') return <Spinner />
 
@@ -67,7 +81,7 @@ export default function App() {
   }
 
   return (
-    <AppShell>
+    <AppShell currentMRR={currentMRR}>
       <Switch>
         <Route path="/" component={DashboardPage} />
         <Route path="/clients" component={ClientsPage} />

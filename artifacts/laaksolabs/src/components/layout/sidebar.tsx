@@ -29,7 +29,7 @@ const BOTTOM_NAV = [
 export function BottomNav() {
   const [location] = useLocation()
   return (
-    <nav className="bottom-nav" style={{ display: 'none', justifyContent: 'space-around', alignItems: 'center' }}>
+    <nav className="bottom-nav" style={{ justifyContent: 'space-around', alignItems: 'center' }}>
       {BOTTOM_NAV.map(({ label, href, icon: Icon }) => {
         const active = location === href
         return (

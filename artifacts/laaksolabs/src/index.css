@@ -245,3 +245,21 @@ html, body, #root {
 .cmd-item:hover, .cmd-item[data-selected="true"] {
   background: var(--surface-2);
 }
+
+/* ─── Bottom nav (mobile only) ───────────────────────────────────────────── */
+.bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: flex;
+    background: var(--sidebar-bg);
+    border-top: 1px solid var(--sidebar-border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    flex-shrink: 0;
+  }
+  aside {
+    display: none !important;
+  }
+}
