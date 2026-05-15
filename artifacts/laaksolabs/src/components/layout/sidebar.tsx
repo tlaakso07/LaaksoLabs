@@ -62,6 +62,7 @@ export function Sidebar({ currentMRR = 0 }: { currentMRR?: number }) {
     <aside
       style={{
         display: 'flex', flexDirection: 'column', height: '100%',
+        width: '220px', flexShrink: 0,
         background: 'var(--sidebar-bg)',
         borderRight: '1px solid var(--sidebar-border)',
         transition: 'background 180ms ease, border-color 180ms ease',
@@ -73,7 +74,7 @@ export function Sidebar({ currentMRR = 0 }: { currentMRR?: number }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         borderBottom: '1px solid var(--sidebar-border)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
           <div style={{
             width: '32px', height: '32px', borderRadius: '9px',
             background: 'var(--sidebar-card)', border: '1px solid var(--sidebar-border)',
@@ -81,11 +82,11 @@ export function Sidebar({ currentMRR = 0 }: { currentMRR?: number }) {
           }}>
             <Zap size={13} strokeWidth={2} style={{ color: 'var(--sidebar-accent)' }} />
           </div>
-          <div>
-            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sidebar-text)', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+            <p style={{ fontSize: '13px', fontWeight: 600, color: 'var(--sidebar-text)', letterSpacing: '-0.02em', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Laakso Labs
             </p>
-            <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--sidebar-text-dim)', marginTop: '2px' }}>
+            <p style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--sidebar-text-dim)', marginTop: '2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               Command Center
             </p>
           </div>
