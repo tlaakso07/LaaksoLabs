@@ -60,8 +60,8 @@ export function Sidebar({ currentMRR = 0 }: { currentMRR?: number }) {
 
   return (
     <aside
-      className="flex flex-col h-full"
       style={{
+        display: 'flex', flexDirection: 'column', height: '100%',
         background: 'var(--sidebar-bg)',
         borderRight: '1px solid var(--sidebar-border)',
         transition: 'background 180ms ease, border-color 180ms ease',
